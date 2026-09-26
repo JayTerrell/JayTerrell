@@ -1,0 +1,262 @@
+[
+ {
+  "item": "Chicken breasts, boneless skinless",
+  "qty": "3 lb family pack",
+  "category": "Meat & Seafood"
+ },
+ {
+  "item": "Chicken drumsticks",
+  "qty": "~3 lb pack",
+  "category": "Meat & Seafood"
+ },
+ {
+  "item": "Ground beef, 93/7 lean",
+  "qty": "2 lb",
+  "category": "Meat & Seafood"
+ },
+ {
+  "item": "Pork chops, boneless",
+  "qty": "~1.5 lb",
+  "category": "Meat & Seafood"
+ },
+ {
+  "item": "Fish fillets, frozen (tilapia or swai)",
+  "qty": "2 lb bag",
+  "category": "Meat & Seafood"
+ },
+ {
+  "item": "Sliced smoked turkey (lunch meat)",
+  "qty": "16 oz",
+  "category": "Meat & Seafood"
+ },
+ {
+  "item": "Hot dogs, beef franks",
+  "qty": "1 pack (8 ct)",
+  "category": "Meat & Seafood"
+ },
+ {
+  "item": "Eggs, large",
+  "qty": "18 ct",
+  "category": "Dairy & Eggs"
+ },
+ {
+  "item": "Greek yogurt, plain nonfat",
+  "qty": "2 x 32 oz tubs",
+  "category": "Dairy & Eggs"
+ },
+ {
+  "item": "Shredded cheese",
+  "qty": "8 oz bag",
+  "category": "Dairy & Eggs"
+ },
+ {
+  "item": "Sliced cheese",
+  "qty": "12 oz (16 slices)",
+  "category": "Dairy & Eggs"
+ },
+ {
+  "item": "Butter, salted",
+  "qty": "1 lb (4 sticks)",
+  "category": "Dairy & Eggs"
+ },
+ {
+  "item": "Carrots, fresh",
+  "qty": "2 lb bag",
+  "category": "Produce"
+ },
+ {
+  "item": "Asparagus, fresh",
+  "qty": "2 bunches (~2 lb)",
+  "category": "Produce"
+ },
+ {
+  "item": "Apples (Gala)",
+  "qty": "3 lb bag",
+  "category": "Produce"
+ },
+ {
+  "item": "Oranges",
+  "qty": "3 lb bag",
+  "category": "Produce"
+ },
+ {
+  "item": "Peaches, frozen unsweetened",
+  "qty": "2 x 16 oz bags",
+  "category": "Produce"
+ },
+ {
+  "item": "Potatoes, russet",
+  "qty": "5 lb bag",
+  "category": "Produce"
+ },
+ {
+  "item": "Green beans, frozen",
+  "qty": "32 oz bag",
+  "category": "Frozen"
+ },
+ {
+  "item": "French fries, frozen",
+  "qty": "32 oz bag",
+  "category": "Frozen"
+ },
+ {
+  "item": "Pepperoni pizzas, frozen",
+  "qty": "2 pizzas",
+  "category": "Frozen"
+ },
+ {
+  "item": "Whole-grain bread",
+  "qty": "2 loaves (20 oz)",
+  "category": "Bakery & Grains"
+ },
+ {
+  "item": "Whole-grain hamburger buns",
+  "qty": "8 ct",
+  "category": "Bakery & Grains"
+ },
+ {
+  "item": "Hot dog buns",
+  "qty": "8 ct",
+  "category": "Bakery & Grains"
+ },
+ {
+  "item": "Tortillas, whole wheat",
+  "qty": "10 ct",
+  "category": "Bakery & Grains"
+ },
+ {
+  "item": "Pasta, whole wheat",
+  "qty": "2 x 16 oz",
+  "category": "Bakery & Grains"
+ },
+ {
+  "item": "Rice, long grain white",
+  "qty": "2 lb bag",
+  "category": "Bakery & Grains"
+ },
+ {
+  "item": "Cereal: Cheerios (original)",
+  "qty": "1 box (~12 oz)",
+  "category": "Pantry"
+ },
+ {
+  "item": "Granola bars (Nature Valley Oats 'n Honey)",
+  "qty": "12 ct box",
+  "category": "Pantry"
+ },
+ {
+  "item": "Marinara sauce",
+  "qty": "24 oz jar",
+  "category": "Pantry"
+ },
+ {
+  "item": "Black beans, canned",
+  "qty": "3 x 15 oz cans",
+  "category": "Pantry"
+ },
+ {
+  "item": "Tortilla chips",
+  "qty": "13 oz bag",
+  "category": "Pantry"
+ },
+ {
+  "item": "Salsa",
+  "qty": "16 oz jar",
+  "category": "Pantry"
+ },
+ {
+  "item": "Olive oil, extra virgin",
+  "qty": "17 oz bottle",
+  "category": "Spices & Condiments"
+ },
+ {
+  "item": "Garlic powder",
+  "qty": "~3 oz",
+  "category": "Spices & Condiments"
+ },
+ {
+  "item": "Onion powder",
+  "qty": "~2.5 oz",
+  "category": "Spices & Condiments"
+ },
+ {
+  "item": "Black pepper, ground",
+  "qty": "~3 oz",
+  "category": "Spices & Condiments"
+ },
+ {
+  "item": "Paprika",
+  "qty": "~2.5 oz",
+  "category": "Spices & Condiments"
+ },
+ {
+  "item": "Cajun seasoning (Tony Chachere's)",
+  "qty": "8 oz",
+  "category": "Spices & Condiments"
+ },
+ {
+  "item": "Lemon pepper",
+  "qty": "~3 oz",
+  "category": "Spices & Condiments"
+ },
+ {
+  "item": "Salt, iodized",
+  "qty": "26 oz",
+  "category": "Spices & Condiments"
+ },
+ {
+  "item": "Barbecue sauce",
+  "qty": "18 oz",
+  "category": "Spices & Condiments"
+ },
+ {
+  "item": "Miracle Whip",
+  "qty": "30 oz jar",
+  "category": "Spices & Condiments"
+ },
+ {
+  "item": "Ketchup",
+  "qty": "32 oz",
+  "category": "Spices & Condiments"
+ },
+ {
+  "item": "Mustard, yellow",
+  "qty": "20 oz",
+  "category": "Spices & Condiments"
+ },
+ {
+  "item": "Sandwich pickles (slices)",
+  "qty": "24 oz jar",
+  "category": "Spices & Condiments"
+ },
+ {
+  "item": "Grape jelly",
+  "qty": "30 oz jar",
+  "category": "Spices & Condiments"
+ },
+ {
+  "item": "Meal-prep containers",
+  "qty": "10 ct",
+  "category": "Household"
+ },
+ {
+  "item": "Zip-top storage bags, gallon",
+  "qty": "40 ct",
+  "category": "Household"
+ },
+ {
+  "item": "Aluminum foil",
+  "qty": "75 sq ft",
+  "category": "Household"
+ },
+ {
+  "item": "Dish soap",
+  "qty": "~20 oz",
+  "category": "Household"
+ },
+ {
+  "item": "Paper towels",
+  "qty": "6 rolls",
+  "category": "Household"
+ }
+]

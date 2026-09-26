@@ -69,28 +69,51 @@ tfoot td.best{background:var(--accent-soft);color:var(--accent)}
 .method h3{font:700 15px var(--display);color:var(--ink);margin:0}
 @media (max-width:560px){.bar-row{grid-template-columns:92px 1fr 72px;gap:8px}}
 @media (prefers-reduced-motion:reduce){.bar{transition:none}}
+
+td.miss{color:var(--muted);text-align:center}
+tr.item{cursor:pointer}
+tr.item:hover td{background:var(--stripe)}
+tr.item td:first-child::before{content:"+";display:inline-block;width:14px;color:var(--muted);font-family:var(--mono)}
+tr.item.open td:first-child::before{content:"\2212"}
+tr.detail td{background:var(--bg);white-space:normal;text-align:left;font-size:12.5px;color:var(--ink2)}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px 18px;padding:4px 0 6px 14px}
+.dgrid b{color:var(--ink);font-weight:600}
+th.partial{color:var(--muted)}
+th .cov{display:block;font-weight:400;font-size:10.5px;letter-spacing:0;color:var(--muted);margin-top:2px}
+.bar-row.na .bar-track{border:1px dashed var(--line);border-radius:4px}
+.bar-row.na .amt{color:var(--muted);font-family:var(--body);font-size:12.5px}
+.stores{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.store{border-top:1px solid var(--line);padding-top:10px;font-size:13.5px;color:var(--ink2);display:grid;gap:3px}
+.store b{color:var(--ink);font-family:var(--display);font-size:15px}
+.pill{display:inline-block;font:600 10.5px var(--mono);letter-spacing:.05em;text-transform:uppercase;border-radius:4px;padding:2px 6px;margin-left:6px;vertical-align:2px}
+.pill.ok{background:var(--accent-soft);color:var(--accent)}
+.pill.warn{background:#FFF1D6;color:#8A5A00}
+.pill.bad{background:var(--hi);color:var(--hi-ink)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pill.warn{background:#3A2E14;color:#F2C46B}}
+:root[data-theme="dark"] .pill.warn{background:#3A2E14;color:#F2C46B}
 </style>
 
 <div class="wrap">
 <header>
-  <span class="eyebrow">Frisco, TX · in-store pickup · 2 weeks, 1 person · Sept 2026</span>
+  <span class="eyebrow">Frisco, TX · in-store pickup prices · collected Sept 26, 2026</span>
   <h1>Which store should you shop at?</h1>
-  <p class="lede">47 items from your list, priced across 8 stores and grouped by aisle. Each price covers the amount you'd buy for 14 days of lunch meal prep plus dinner, with light breakfasts. Store brands are used unless the item is a named brand. All prices are estimates; see the method notes at the bottom.</p>
+  <p class="lede">Real prices pulled from each store's own online ordering system for a Frisco location, covering the 47 items on your two-week list. Store brands are used unless you named a brand. Tap any row to see the exact product each store matched.</p>
 </header>
 
 <section class="verdict" id="verdict" aria-live="polite"></section>
 
 <div class="controls" role="group" aria-label="Basket options">
-  <div class="seg" role="group" aria-label="Pricing mode">
-    <button id="mode-pickup" aria-pressed="true">Pickup price</button>
-    <button id="mode-shelf" aria-pressed="false">Shelf price</button>
+  <div class="seg" role="group" aria-label="Which items to total">
+    <button id="mode-common" aria-pressed="true">Same items everywhere</button>
+    <button id="mode-all" aria-pressed="false">Everything each store had</button>
   </div>
-  <label><input type="checkbox" id="opt-staples" checked> Include pantry staples (spices, oil, condiments)</label>
-  <label><input type="checkbox" id="opt-house"> Add household items for meal prep</label>
+  <label><input type="checkbox" id="opt-staples" checked> Include pantry staples</label>
+  <label><input type="checkbox" id="opt-house"> Add household items</label>
 </div>
 
 <section class="chart" aria-label="Total basket cost by store">
-  <h2>Total basket cost</h2>
+  <h2 id="chart-title">Total basket cost</h2>
+  <p id="chart-sub" style="margin:-4px 0 4px;color:var(--ink2);font-size:14px"></p>
   <div id="bars"></div>
 </section>
 
@@ -99,30 +122,38 @@ tfoot td.best{background:var(--accent-soft);color:var(--accent)}
   <div class="legend">
     <span><span class="sw" style="background:var(--accent-soft);border:1px solid var(--accent)"></span>Cheapest store for the item</span>
     <span><span class="sw" style="background:var(--hi);border:1px solid var(--hi-ink)"></span>Most expensive</span>
+    <span>— not carried or not found</span>
     <span><span class="tag" style="margin:0 4px 0 0">staple</span>lasts well beyond 2 weeks</span>
   </div>
   <div class="tablebox"><table id="matrix"></table></div>
 </section>
 
+<section style="display:grid;gap:12px">
+  <h2>Where each price came from</h2>
+  <div class="stores" id="stores"></div>
+</section>
+
 <section class="method">
   <div>
-    <h3>How these prices were built</h3>
+    <h3>How to read the totals</h3>
     <ul>
-      <li>This environment can't reach the store websites directly, so no live prices were scraped.</li>
-      <li>Walmart store-brand prices are the anchor, set to Aug 2026 national averages (BLS: eggs $2.14/dozen, ground beef $6.83/lb, chicken breast $4.18/lb).</li>
-      <li>Other stores are modeled from each chain's typical price level by aisle, with per-item variation. Expect any single item to be off by 10–20%. The store ranking is more reliable than any single price.</li>
+      <li>"Same items everywhere" totals only the items that every fully priced store carries, so the stores are compared on an identical list.</li>
+      <li>Meat is priced per pound for your quantity. Stores sell fixed packs (often 4–5 lb), so the checkout amount can be higher.</li>
+      <li>Prices are regular prices. Sales, digital coupons and loyalty prices are not included.</li>
     </ul>
   </div>
   <div>
-    <h3>Pickup costs assumed</h3>
-    <ul id="pickup-notes"></ul>
+    <h3>Not included</h3>
+    <ul>
+      <li>Pickup fees. Aldi and Sprouts pickup runs through Instacart, which may add a small fee.</li>
+      <li>Sales tax. Most groceries are tax-exempt in Texas; household items are taxed at 8.25%.</li>
+    </ul>
   </div>
   <div>
     <h3>Before you order</h3>
     <ul>
-      <li>Kroger's digital coupons and H-E-B's weekly deals can cut 5–10% off. A recent DFW store-brand study put Kroger at $30.00 for 15 items, just under Walmart ($30.95) and Aldi ($33.15).</li>
-      <li>Add your list to your top two stores' apps and compare the real cart totals.</li>
-      <li>Aldi and Sprouts use substitutes for some national brands (Miracle Whip, Cheerios). Those rows are noted.</li>
+      <li>Prices change weekly. Build the cart in your top store's app to confirm the total.</li>
+      <li>If Aldi is your store, plan a quick second stop for the few items it doesn't carry.</li>
     </ul>
   </div>
 </section>
@@ -132,60 +163,83 @@ tfoot td.best{background:var(--accent-soft);color:var(--accent)}
 const DATA = __DATA__;
 const S = DATA.stores, fmt = n => "$" + n.toFixed(2);
 const CATS = ["Produce","Dairy & Eggs","Meat & Seafood","Frozen","Bakery & Grains","Pantry","Spices & Condiments","Household"];
-const state = {mode:"pickup", staples:true, house:false};
+const FULL = S.filter(s => DATA.meta[s].found >= 40);
+const state = {mode:"common", staples:true, house:false, open:new Set()};
 const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
-function visible(r){ return (state.house || !r.household) && (state.staples || !r.staple || r.household); }
-function price(r,s){ const m = state.mode==="pickup" ? 1 + DATA.pickup[s].markup : 1; return r.prices[s]*m; }
-function totals(){
-  const items = DATA.items.filter(visible), t = {};
-  S.forEach(s => { t[s] = items.reduce((a,r)=>a+price(r,s),0) + (state.mode==="pickup" ? DATA.pickup[s].fee : 0); });
-  return {items, t};
+function selected(){ return DATA.rows.filter(r => (state.house || !r.household) && (state.staples || !r.staple)); }
+function basket(){
+  const sel = selected();
+  const common = sel.filter(r => FULL.every(s => r.cells[s]));
+  const items = state.mode === "common" ? common : sel;
+  const t = {}, n = {};
+  S.forEach(s => { const got = items.filter(r => r.cells[s]); t[s] = got.reduce((a,r)=>a+r.cells[s].price,0); n[s] = got.length; });
+  return {sel, common, items, t, n};
 }
 
 function render(){
-  const {items, t} = totals();
-  const ranked = [...S].sort((a,b)=>t[a]-t[b]), best = ranked[0], worst = ranked[ranked.length-1];
-  // Verdict
-  const other = state.mode==="pickup" ? "shelf" : "pickup";
-  const alt = (()=>{ const s0=state.mode; state.mode=other; const r=totals().t; state.mode=s0; return [...S].sort((a,b)=>r[a]-r[b])[0]; })();
+  const {sel, common, items, t, n} = basket();
+  const ranked = FULL.slice().sort((a,b)=>t[a]-t[b]);
+  const best = ranked[0], second = ranked[1], worst = ranked[ranked.length-1];
+  const commonT = {}; FULL.forEach(s => commonT[s] = common.reduce((a,r)=>a+r.cells[s].price,0));
+  const cr = FULL.slice().sort((a,b)=>commonT[a]-commonT[b]);
+  const missing = sel.filter(r => !r.cells[cr[0]]);
+  const fill = missing.reduce((a,r)=> a + (r.cells[cr[1]] ? r.cells[cr[1]].price : 0), 0);
+  const allT = s => sel.filter(r=>r.cells[s]).reduce((a,r)=>a+r.cells[s].price,0);
   $("verdict").innerHTML = `
-    <div class="card win"><span class="k">Best single store</span><span class="v">${best}<small>${fmt(t[best])}</small></span>
-      <p>Lowest ${state.mode==="pickup"?"pickup":"shelf"} total for this basket. ${ranked[1]} is next at ${fmt(t[ranked[1]])} (+${fmt(t[ranked[1]]-t[best])}).</p></div>
-    <div class="card"><span class="k">Most expensive</span><span class="v">${worst}<small>${fmt(t[worst])}</small></span>
-      <p>${fmt(t[worst]-t[best])} more than ${best}, or ${Math.round((t[worst]/t[best]-1)*100)}% extra every two weeks.</p></div>
-    <div class="card"><span class="k">${state.mode==="pickup"?"If you shop in the store":"If you order pickup"}</span><span class="v">${alt}</span>
-      <p>${alt===best ? "Same winner either way." : `${alt} wins on ${other} prices. ${state.mode==="pickup" ? "Aldi's Instacart pickup adds a fee and online markup that erase its shelf-price lead." : "H-E-B's free curbside with no markup beats Aldi's Instacart pickup."}`}</p></div>`;
-  // Bars
-  const max = t[worst];
+    <div class="card win"><span class="k">Best single store</span><span class="v">${cr[0]}<small>${fmt(commonT[cr[0]])}</small></span>
+      <p>Lowest total on the ${common.length} items every store carries. ${cr[1]} is next at ${fmt(commonT[cr[1]])} (+${fmt(commonT[cr[1]]-commonT[cr[0]])}).</p></div>
+    <div class="card"><span class="k">${cr[0]} doesn't carry</span><span class="v">${missing.length} items<small>~${fmt(fill)} at ${cr[1]}</small></span>
+      <p>${missing.map(r=>esc(r.item.split(",")[0].split(" (")[0])).join(", ") || "Nothing on this list"}. Even adding those from ${cr[1]}, the full list is about ${fmt(allT(cr[0])+fill)} vs. ${fmt(allT(cr[1]))} all at ${cr[1]}.</p></div>
+    <div class="card"><span class="k">Most expensive</span><span class="v">${cr[cr.length-1]}<small>${fmt(commonT[cr[cr.length-1]])}</small></span>
+      <p>${fmt(commonT[cr[cr.length-1]]-commonT[cr[0]])} more than ${cr[0]} for the same ${common.length} items, mostly from organic and premium brands.</p></div>`;
+  $("chart-title").textContent = state.mode==="common" ? `Same ${common.length} items at every store` : "Everything each store had";
+  $("chart-sub").textContent = state.mode==="common" ? "Stores with too few prices (Target, Kroger) are left out of the ranking." : "Stores that are missing items look cheaper here. The item count is shown next to each total.";
+  const max = Math.max(...FULL.map(s=>t[s]));
+  const partial = S.filter(s => !FULL.includes(s));
   $("bars").innerHTML = ranked.map((s,i)=>`
     <div class="bar-row${s===best?" best":""}" title="${s}: ${fmt(t[s])}">
       <span class="name">${s}</span>
       <div class="bar-track"><div class="bar" style="width:${(t[s]/max*100).toFixed(1)}%"></div></div>
-      <span class="amt">${fmt(t[s])}<span class="rank">#${i+1}</span></span>
-    </div>`).join("");
+      <span class="amt">${fmt(t[s])}<span class="rank">${state.mode==="common" ? "#"+(i+1) : n[s]+" items"}</span></span>
+    </div>`).join("") + partial.map(s=>`
+    <div class="bar-row na"><span class="name">${s}</span><div class="bar-track"></div>
+      <span class="amt">${DATA.meta[s].found ? DATA.meta[s].found+" of "+DATA.grocery_items+" priced" : "blocked"}</span></div>`).join("");
   // Matrix
-  let h = `<thead><tr><th>Item</th>${S.map(s=>`<th>${s}</th>`).join("")}</tr></thead><tbody>`;
+  let h = `<thead><tr><th>Item</th>${S.map(s=>`<th class="${FULL.includes(s)?"":"partial"}">${s}<span class="cov">${DATA.meta[s].found}/${DATA.grocery_items} found</span></th>`).join("")}</tr></thead><tbody>`;
   CATS.forEach(c=>{
     const rows = items.filter(r=>r.category===c); if(!rows.length) return;
-    const sub = {}; S.forEach(s=>sub[s]=rows.reduce((a,r)=>a+price(r,s),0));
-    h += `<tr class="cat"><td>${c}</td>${S.map(s=>`<td class="num">${fmt(sub[s])}</td>`).join("")}</tr>`;
+    h += `<tr class="cat"><td>${c}</td>${S.map(s=>{const g=rows.filter(r=>r.cells[s]);return `<td class="num">${g.length?fmt(g.reduce((a,r)=>a+r.cells[s].price,0)):""}</td>`}).join("")}</tr>`;
     rows.forEach(r=>{
-      const ps = S.map(s=>price(r,s)), lo=Math.min(...ps), hi=Math.max(...ps);
-      h += `<tr><td>${r.item}${r.staple&&!r.household?'<span class="tag">staple</span>':""}<span class="qty">${r.qty}</span>${r.note?`<span class="note">${r.note}</span>`:""}</td>`+
-        ps.map(p=>`<td class="num${p===lo?" low":p===hi?" high":""}">${fmt(p)}</td>`).join("")+`</tr>`;
+      const ps = S.map(s=>r.cells[s]?r.cells[s].price:null), have = ps.filter(p=>p!==null);
+      const lo = Math.min(...have), hi = Math.max(...have), key = r.item, open = state.open.has(key);
+      h += `<tr class="item${open?" open":""}" data-k="${esc(key)}" tabindex="0" aria-expanded="${open}"><td>${esc(r.item)}${r.staple?'<span class="tag">staple</span>':""}<span class="qty">${esc(r.qty)}</span></td>`+
+        ps.map(p=> p===null ? `<td class="miss">—</td>` : `<td class="num${have.length>1&&p===lo?" low":have.length>1&&p===hi?" high":""}">${fmt(p)}</td>`).join("")+`</tr>`;
+      if(open) h += `<tr class="detail"><td colspan="${S.length+1}"><div class="dgrid">${S.map(s=>{const c=r.cells[s];return `<div><b>${s}</b><br>${c?`${esc(c.product)}<br>${esc(c.calc)}${c.note?`<br><i>${esc(c.note)}</i>`:""}`:"Not found"}</div>`}).join("")}</div></td></tr>`;
     });
   });
-  h += `</tbody><tfoot>`;
-  if(state.mode==="pickup") h += `<tr class="sub"><td>Pickup fee</td>${S.map(s=>`<td class="num">${fmt(DATA.pickup[s].fee)}</td>`).join("")}</tr>`;
-  h += `<tr><td>Basket total (${items.length} items)</td>${S.map(s=>`<td class="num${s===best?" best":""}">${fmt(t[s])}</td>`).join("")}</tr></tfoot>`;
+  h += `</tbody><tfoot><tr><td>Total (${items.length} items)</td>${S.map(s=>`<td class="num${s===best?" best":""}">${n[s]?fmt(t[s]):"—"}</td>`).join("")}</tr></tfoot>`;
   $("matrix").innerHTML = h;
 }
 
-$("pickup-notes").innerHTML = S.map(s=>{const p=DATA.pickup[s];return `<li><b>${s}</b>: ${p.fee?fmt(p.fee)+" fee":"free"}${p.markup?`, +${p.markup*100}% online markup`:""}. ${p.note}.</li>`}).join("");
-$("mode-pickup").onclick=()=>{state.mode="pickup";$("mode-pickup").setAttribute("aria-pressed","true");$("mode-shelf").setAttribute("aria-pressed","false");render();};
-$("mode-shelf").onclick=()=>{state.mode="shelf";$("mode-shelf").setAttribute("aria-pressed","true");$("mode-pickup").setAttribute("aria-pressed","false");render();};
+const STATUS = {"Walmart":["warn","California store"],"Target":["bad","Partly blocked"],"Kroger":["bad","Blocked"]};
+$("stores").innerHTML = S.map(s=>{const m=DATA.meta[s], st=STATUS[s]||["ok","Frisco store"];
+  const extra = {"Walmart":"Walmart sets the store from the visitor's location, and this cloud environment connects from California. Frisco prices may differ slightly.",
+    "Target":"Target's bot protection blocked most searches, so only 11 items were priced.",
+    "Kroger":"Kroger blocked every request from this environment. A free Kroger developer API key would fix this.",
+    "Aldi":"Pickup prices shown. The same items cost about 7% less if you shop in the store.",
+    "H-E-B":"Curbside prices shown, read from H-E-B's app data for this store.",
+    "Sprouts":"Pickup and in-store prices were identical."}[s]||"";
+  return `<div class="store"><b>${s}<span class="pill ${st[0]}">${st[1]}</span></b><span>${esc(m.location||"No store could be set")}</span><span>${m.found} of ${DATA.grocery_items} items priced.</span>${extra?`<span>${extra}</span>`:""}</div>`}).join("");
+
+function setMode(m){state.mode=m;$("mode-common").setAttribute("aria-pressed",m==="common");$("mode-all").setAttribute("aria-pressed",m==="all");render();}
+$("mode-common").onclick=()=>setMode("common");
+$("mode-all").onclick=()=>setMode("all");
 $("opt-staples").onchange=e=>{state.staples=e.target.checked;render();};
 $("opt-house").onchange=e=>{state.house=e.target.checked;render();};
+function toggle(tr){const k=tr.dataset.k;state.open.has(k)?state.open.delete(k):state.open.add(k);render();}
+$("matrix").addEventListener("click",e=>{const tr=e.target.closest("tr.item");if(tr)toggle(tr);});
+$("matrix").addEventListener("keydown",e=>{const tr=e.target.closest("tr.item");if(tr&&(e.key==="Enter"||e.key===" ")){e.preventDefault();toggle(tr);}});
 render();
 </script>
