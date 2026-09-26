@@ -1,0 +1,191 @@
+<title>Frisco Grocery Basket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F5F7F6; --surface:#FFFFFF; --ink:#18221E; --ink2:#4B5A54; --muted:#7A8882;
+  --line:#DCE3E0; --accent:#1D6A4C; --accent-soft:#DCEFE5; --hi:#F6E3DF; --hi-ink:#8A3A2B;
+  --bar:#9DB8AD; --stripe:#EEF2F0;
+  --display:"Archivo",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark; --bg:#111715; --surface:#18201D; --ink:#E6EEEA; --ink2:#AFBDB7; --muted:#83928C;
+  --line:#2C3833; --accent:#5FC596; --accent-soft:#1D3B2E; --hi:#3A2420; --hi-ink:#F0A697; --bar:#4A6358; --stripe:#1C2521;}}
+:root[data-theme="dark"]{
+  color-scheme:dark; --bg:#111715; --surface:#18201D; --ink:#E6EEEA; --ink2:#AFBDB7; --muted:#83928C;
+  --line:#2C3833; --accent:#5FC596; --accent-soft:#1D3B2E; --hi:#3A2420; --hi-ink:#F0A697; --bar:#4A6358; --stripe:#1C2521;}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--body);}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:32px 56px;display:grid;gap:28px}
+h1,h2{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(28px,4.4vw,42px);font-weight:800;line-height:1.1}
+h2{font-size:20px;font-weight:700}
+.eyebrow{font:600 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.lede{max-width:68ch;color:var(--ink2);margin:10px 0 0}
+header{display:grid;gap:8px}
+.verdict{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:grid;gap:6px;align-content:start}
+.card.win{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.card .k{font:600 11px/1.2 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.card .v{font:800 26px/1.15 var(--display)}
+.card .v small{font:500 15px var(--mono);color:var(--ink2);margin-left:6px}
+.card p{margin:0;color:var(--ink2);font-size:14px}
+.controls{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:500 13px var(--body);background:transparent;color:var(--ink2);border:0;padding:7px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+.controls label{display:inline-flex;gap:8px;align-items:center;font-size:14px;color:var(--ink2);cursor:pointer}
+.controls input{accent-color:var(--accent);width:16px;height:16px}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chart{display:grid;gap:8px}
+.bar-row{display:grid;grid-template-columns:120px 1fr 86px;gap:12px;align-items:center;font-size:14px}
+.bar-row .name{color:var(--ink2);text-align:right}
+.bar-track{height:22px;position:relative}
+.bar{height:100%;background:var(--bar);border-radius:0 4px 4px 0;transition:width .35s ease}
+.bar-row.best .bar{background:var(--accent)}
+.bar-row.best .name{color:var(--ink);font-weight:600}
+.bar-row .amt{font:500 14px var(--mono);font-variant-numeric:tabular-nums}
+.bar-row .rank{font:500 12px var(--mono);color:var(--muted);margin-left:4px}
+.tablebox{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:980px;font-size:13.5px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal;min-width:230px;position:sticky;left:0;background:var(--surface);z-index:1}
+thead th{font:600 12px var(--mono);letter-spacing:.04em;color:var(--ink2);position:sticky;top:0;background:var(--surface);z-index:2;vertical-align:bottom}
+thead th:first-child{z-index:3}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+td.low{background:var(--accent-soft);color:var(--accent);font-weight:600}
+td.high{color:var(--hi-ink);background:var(--hi)}
+tr.cat td{background:var(--stripe);font:700 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);padding-top:12px}
+tr.cat td:first-child{background:var(--stripe)}
+.qty{display:block;color:var(--muted);font-size:12px}
+.tag{font:600 10px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 5px;margin-left:6px;vertical-align:1px}
+.note{display:block;color:var(--muted);font-size:12px;font-style:italic}
+tfoot td{font:600 14px var(--mono);border-bottom:0;border-top:2px solid var(--ink)}
+tfoot tr.sub td{font-weight:500;font-size:13px;border-top:1px solid var(--line);color:var(--ink2)}
+tfoot td.best{background:var(--accent-soft);color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--ink2)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:6px}
+.method{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;color:var(--ink2);font-size:14px}
+.method ul{margin:6px 0 0;padding-left:18px;display:grid;gap:4px}
+.method h3{font:700 15px var(--display);color:var(--ink);margin:0}
+@media (max-width:560px){.bar-row{grid-template-columns:92px 1fr 72px;gap:8px}}
+@media (prefers-reduced-motion:reduce){.bar{transition:none}}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">Frisco, TX · in-store pickup · 2 weeks, 1 person · Sept 2026</span>
+  <h1>Which store should you shop at?</h1>
+  <p class="lede">47 items from your list, priced across 8 stores and grouped by aisle. Each price covers the amount you'd buy for 14 days of lunch meal prep plus dinner, with light breakfasts. Store brands are used unless the item is a named brand. All prices are estimates; see the method notes at the bottom.</p>
+</header>
+
+<section class="verdict" id="verdict" aria-live="polite"></section>
+
+<div class="controls" role="group" aria-label="Basket options">
+  <div class="seg" role="group" aria-label="Pricing mode">
+    <button id="mode-pickup" aria-pressed="true">Pickup price</button>
+    <button id="mode-shelf" aria-pressed="false">Shelf price</button>
+  </div>
+  <label><input type="checkbox" id="opt-staples" checked> Include pantry staples (spices, oil, condiments)</label>
+  <label><input type="checkbox" id="opt-house"> Add household items for meal prep</label>
+</div>
+
+<section class="chart" aria-label="Total basket cost by store">
+  <h2>Total basket cost</h2>
+  <div id="bars"></div>
+</section>
+
+<section style="display:grid;gap:12px">
+  <h2>Item-by-item matrix</h2>
+  <div class="legend">
+    <span><span class="sw" style="background:var(--accent-soft);border:1px solid var(--accent)"></span>Cheapest store for the item</span>
+    <span><span class="sw" style="background:var(--hi);border:1px solid var(--hi-ink)"></span>Most expensive</span>
+    <span><span class="tag" style="margin:0 4px 0 0">staple</span>lasts well beyond 2 weeks</span>
+  </div>
+  <div class="tablebox"><table id="matrix"></table></div>
+</section>
+
+<section class="method">
+  <div>
+    <h3>How these prices were built</h3>
+    <ul>
+      <li>This environment can't reach the store websites directly, so no live prices were scraped.</li>
+      <li>Walmart store-brand prices are the anchor, set to Aug 2026 national averages (BLS: eggs $2.14/dozen, ground beef $6.83/lb, chicken breast $4.18/lb).</li>
+      <li>Other stores are modeled from each chain's typical price level by aisle, with per-item variation. Expect any single item to be off by 10–20%. The store ranking is more reliable than any single price.</li>
+    </ul>
+  </div>
+  <div>
+    <h3>Pickup costs assumed</h3>
+    <ul id="pickup-notes"></ul>
+  </div>
+  <div>
+    <h3>Before you order</h3>
+    <ul>
+      <li>Kroger's digital coupons and H-E-B's weekly deals can cut 5–10% off. A recent DFW store-brand study put Kroger at $30.00 for 15 items, just under Walmart ($30.95) and Aldi ($33.15).</li>
+      <li>Add your list to your top two stores' apps and compare the real cart totals.</li>
+      <li>Aldi and Sprouts use substitutes for some national brands (Miracle Whip, Cheerios). Those rows are noted.</li>
+    </ul>
+  </div>
+</section>
+</div>
+
+<script>
+const DATA = __DATA__;
+const S = DATA.stores, fmt = n => "$" + n.toFixed(2);
+const CATS = ["Produce","Dairy & Eggs","Meat & Seafood","Frozen","Bakery & Grains","Pantry","Spices & Condiments","Household"];
+const state = {mode:"pickup", staples:true, house:false};
+const $ = id => document.getElementById(id);
+
+function visible(r){ return (state.house || !r.household) && (state.staples || !r.staple || r.household); }
+function price(r,s){ const m = state.mode==="pickup" ? 1 + DATA.pickup[s].markup : 1; return r.prices[s]*m; }
+function totals(){
+  const items = DATA.items.filter(visible), t = {};
+  S.forEach(s => { t[s] = items.reduce((a,r)=>a+price(r,s),0) + (state.mode==="pickup" ? DATA.pickup[s].fee : 0); });
+  return {items, t};
+}
+
+function render(){
+  const {items, t} = totals();
+  const ranked = [...S].sort((a,b)=>t[a]-t[b]), best = ranked[0], worst = ranked[ranked.length-1];
+  // Verdict
+  const other = state.mode==="pickup" ? "shelf" : "pickup";
+  const alt = (()=>{ const s0=state.mode; state.mode=other; const r=totals().t; state.mode=s0; return [...S].sort((a,b)=>r[a]-r[b])[0]; })();
+  $("verdict").innerHTML = `
+    <div class="card win"><span class="k">Best single store</span><span class="v">${best}<small>${fmt(t[best])}</small></span>
+      <p>Lowest ${state.mode==="pickup"?"pickup":"shelf"} total for this basket. ${ranked[1]} is next at ${fmt(t[ranked[1]])} (+${fmt(t[ranked[1]]-t[best])}).</p></div>
+    <div class="card"><span class="k">Most expensive</span><span class="v">${worst}<small>${fmt(t[worst])}</small></span>
+      <p>${fmt(t[worst]-t[best])} more than ${best}, or ${Math.round((t[worst]/t[best]-1)*100)}% extra every two weeks.</p></div>
+    <div class="card"><span class="k">${state.mode==="pickup"?"If you shop in the store":"If you order pickup"}</span><span class="v">${alt}</span>
+      <p>${alt===best ? "Same winner either way." : `${alt} wins on ${other} prices. ${state.mode==="pickup" ? "Aldi's Instacart pickup adds a fee and online markup that erase its shelf-price lead." : "H-E-B's free curbside with no markup beats Aldi's Instacart pickup."}`}</p></div>`;
+  // Bars
+  const max = t[worst];
+  $("bars").innerHTML = ranked.map((s,i)=>`
+    <div class="bar-row${s===best?" best":""}" title="${s}: ${fmt(t[s])}">
+      <span class="name">${s}</span>
+      <div class="bar-track"><div class="bar" style="width:${(t[s]/max*100).toFixed(1)}%"></div></div>
+      <span class="amt">${fmt(t[s])}<span class="rank">#${i+1}</span></span>
+    </div>`).join("");
+  // Matrix
+  let h = `<thead><tr><th>Item</th>${S.map(s=>`<th>${s}</th>`).join("")}</tr></thead><tbody>`;
+  CATS.forEach(c=>{
+    const rows = items.filter(r=>r.category===c); if(!rows.length) return;
+    const sub = {}; S.forEach(s=>sub[s]=rows.reduce((a,r)=>a+price(r,s),0));
+    h += `<tr class="cat"><td>${c}</td>${S.map(s=>`<td class="num">${fmt(sub[s])}</td>`).join("")}</tr>`;
+    rows.forEach(r=>{
+      const ps = S.map(s=>price(r,s)), lo=Math.min(...ps), hi=Math.max(...ps);
+      h += `<tr><td>${r.item}${r.staple&&!r.household?'<span class="tag">staple</span>':""}<span class="qty">${r.qty}</span>${r.note?`<span class="note">${r.note}</span>`:""}</td>`+
+        ps.map(p=>`<td class="num${p===lo?" low":p===hi?" high":""}">${fmt(p)}</td>`).join("")+`</tr>`;
+    });
+  });
+  h += `</tbody><tfoot>`;
+  if(state.mode==="pickup") h += `<tr class="sub"><td>Pickup fee</td>${S.map(s=>`<td class="num">${fmt(DATA.pickup[s].fee)}</td>`).join("")}</tr>`;
+  h += `<tr><td>Basket total (${items.length} items)</td>${S.map(s=>`<td class="num${s===best?" best":""}">${fmt(t[s])}</td>`).join("")}</tr></tfoot>`;
+  $("matrix").innerHTML = h;
+}
+
+$("pickup-notes").innerHTML = S.map(s=>{const p=DATA.pickup[s];return `<li><b>${s}</b>: ${p.fee?fmt(p.fee)+" fee":"free"}${p.markup?`, +${p.markup*100}% online markup`:""}. ${p.note}.</li>`}).join("");
+$("mode-pickup").onclick=()=>{state.mode="pickup";$("mode-pickup").setAttribute("aria-pressed","true");$("mode-shelf").setAttribute("aria-pressed","false");render();};
+$("mode-shelf").onclick=()=>{state.mode="shelf";$("mode-shelf").setAttribute("aria-pressed","true");$("mode-pickup").setAttribute("aria-pressed","false");render();};
+$("opt-staples").onchange=e=>{state.staples=e.target.checked;render();};
+$("opt-house").onchange=e=>{state.house=e.target.checked;render();};
+render();
+</script>
