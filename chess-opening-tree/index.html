@@ -1,0 +1,1228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The e6 Opening Tree</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2&text=%E2%99%9A%E2%99%9B%E2%99%9C%E2%99%9D%E2%99%9E%E2%99%9F&display=block">
+<style>
+/* Layout: a two-pane analysis desk. Board and position card on the left, the move tree on the right,
+   trap and transposition references below. Scoresheet-ink accent on cool paper; the board stays wood in both themes. */
+:root {
+  --bg: #ECEFF3;
+  --surface: #FFFFFF;
+  --surface-2: #F5F7FA;
+  --ink: #131821;
+  --muted: #586274;
+  --rule: #D4DAE2;
+  --accent: #2446A3;
+  --accent-soft: #E2E8F7;
+  --danger: #B42318;
+  --danger-soft: #FBE7E5;
+  --good: #1D7148;
+  --res-w: #FBFBF8;
+  --res-d: #A4ABB6;
+  --res-b: #252A33;
+  --res-edge: #B6BEC9;
+  --chip-w-bg: #FFFFFF;
+  --chip-w-fg: #131821;
+  --chip-b-bg: #20252E;
+  --chip-b-fg: #F4F5F7;
+  --sq-light: #EAD7B7;
+  --sq-dark: #AE8058;
+  --sq-from: rgba(240, 196, 60, 0.55);
+  --sq-to: rgba(240, 196, 60, 0.75);
+  --piece-w: #FCFBF7;
+  --piece-w-edge: #1B1A18;
+  --piece-b: #17181C;
+  --piece-b-edge: #F1E6D4;
+  --arrow: rgba(36, 70, 163, 0.80);
+  --arrow-soft: rgba(36, 70, 163, 0.35);
+  --arrow-bad: rgba(180, 35, 24, 0.85);
+  --shadow: 0 1px 2px rgba(19, 24, 33, 0.06), 0 6px 20px rgba(19, 24, 33, 0.06);
+
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --f-piece: "Noto Sans Symbols 2", "Segoe UI Symbol", "DejaVu Sans", "Apple Symbols", sans-serif;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1217; --surface: #181C23; --surface-2: #1E232C; --ink: #E8EBF0; --muted: #9AA3B2; --rule: #2B313C;
+    --accent: #8EA9F2; --accent-soft: #222C45; --danger: #F08A80; --danger-soft: #3A1E1C; --good: #6CCB98;
+    --res-w: #E9E9E4; --res-d: #6C7380; --res-b: #07080A; --res-edge: #444B57;
+    --chip-w-bg: #E9EAEE; --chip-w-fg: #131821; --chip-b-bg: #07080A; --chip-b-fg: #E8EBF0;
+    --sq-light: #D9C3A0; --sq-dark: #9A6E49;
+    --arrow: rgba(36, 70, 163, 0.85); --arrow-soft: rgba(36, 70, 163, 0.40); --arrow-bad: rgba(190, 40, 28, 0.9);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1217; --surface: #181C23; --surface-2: #1E232C; --ink: #E8EBF0; --muted: #9AA3B2; --rule: #2B313C;
+  --accent: #8EA9F2; --accent-soft: #222C45; --danger: #F08A80; --danger-soft: #3A1E1C; --good: #6CCB98;
+  --res-w: #E9E9E4; --res-d: #6C7380; --res-b: #07080A; --res-edge: #444B57;
+  --chip-w-bg: #E9EAEE; --chip-w-fg: #131821; --chip-b-bg: #07080A; --chip-b-fg: #E8EBF0;
+  --sq-light: #D9C3A0; --sq-dark: #9A6E49;
+  --arrow: rgba(36, 70, 163, 0.85); --arrow-soft: rgba(36, 70, 163, 0.40); --arrow-bad: rgba(190, 40, 28, 0.9);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 48px; display: flex; flex-direction: column; gap: 28px; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mono { font-family: var(--f-mono); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* Header */
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; }
+.brand h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(28px, 4.4vw, 44px); line-height: 1.02; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+.brand h1 .e6 { font-family: var(--f-mono); font-weight: 600; font-size: 0.82em; letter-spacing: -0.04em; color: var(--accent); }
+.brand p { margin: 8px 0 0; color: var(--muted); max-width: 60ch; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.seg { display: inline-flex; background: var(--surface); border: 1px solid var(--rule); border-radius: 999px; padding: 3px; gap: 2px; }
+.seg button { border: 0; background: transparent; padding: 6px 14px; border-radius: 999px; cursor: pointer; font-size: 14px; white-space: nowrap; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.seg .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); align-self: center; padding: 0 6px 0 10px; }
+.seg .mono { font-size: 13px; }
+
+/* Desk */
+.desk { display: grid; grid-template-columns: minmax(0, 440px) minmax(0, 1fr); gap: 24px; align-items: start; }
+.left { display: flex; flex-direction: column; gap: 14px; min-width: 0; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+.right { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); box-shadow: var(--shadow); min-width: 0; }
+.panel-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 16px 10px; border-bottom: 1px solid var(--rule); }
+.panel-h h2 { font-family: var(--f-display); font-weight: 700; font-size: 18px; margin: 0; letter-spacing: -0.01em; }
+.panel-h .aside { font-size: 12px; color: var(--muted); }
+
+/* Board */
+.boardbox { position: relative; width: 100%; max-width: 440px; aspect-ratio: 1; container-type: inline-size; border-radius: 6px; overflow: hidden; box-shadow: 0 0 0 1px rgba(0,0,0,0.25), var(--shadow); }
+.board { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); }
+.sq { position: relative; display: grid; place-items: center; }
+.sq.l { background: var(--sq-light); }
+.sq.d { background: var(--sq-dark); }
+.sq.from::before, .sq.to::before { content: ""; position: absolute; inset: 0; }
+.sq.from::before { background: var(--sq-from); }
+.sq.to::before { background: var(--sq-to); }
+.pc { position: relative; font-family: var(--f-piece); font-size: 10.2cqw; line-height: 1; user-select: none; transform: translateY(-2%); }
+.pc.w { color: var(--piece-w); -webkit-text-stroke: 0.22cqw var(--piece-w-edge); paint-order: stroke fill; text-shadow: 0 0.3cqw 0.6cqw rgba(0,0,0,0.25); }
+.pc.b { color: var(--piece-b); -webkit-text-stroke: 0.12cqw var(--piece-b-edge); paint-order: stroke fill; text-shadow: 0 0.3cqw 0.6cqw rgba(0,0,0,0.25); }
+.coord { position: absolute; font-family: var(--f-mono); font-size: 2.4cqw; font-weight: 600; line-height: 1; opacity: 0.85; }
+.coord.f { right: 4%; bottom: 4%; }
+.coord.r { left: 5%; top: 5%; }
+.sq.l .coord { color: var(--sq-dark); }
+.sq.d .coord { color: var(--sq-light); }
+.arrows { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+.nav { display: flex; gap: 6px; align-items: center; }
+.nav button { flex: 1; border: 1px solid var(--rule); background: var(--surface); border-radius: 8px; padding: 8px 0; cursor: pointer; font-family: var(--f-mono); font-size: 14px; }
+.nav button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.nav button:disabled { opacity: 0.4; cursor: default; }
+.nav .flip { flex: 1.4; font-family: var(--f-body); font-size: 13px; }
+
+.moves { font-family: var(--f-mono); font-size: 13.5px; line-height: 1.9; display: flex; flex-wrap: wrap; gap: 0 2px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); min-height: 46px; }
+.moves button { border: 0; background: transparent; padding: 0 4px; border-radius: 4px; cursor: pointer; }
+.moves button:hover { background: var(--accent-soft); }
+.moves button.cur { background: var(--ink); color: var(--bg); }
+.moves button.fut { color: var(--muted); }
+.moves button.bad { text-decoration: underline wavy var(--danger); text-underline-offset: 4px; }
+.moves button.key { text-decoration: underline var(--accent) 2px; text-underline-offset: 4px; }
+.moves .start { color: var(--muted); font-family: var(--f-body); font-size: 12px; }
+
+/* Position card */
+.card { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.eyebrow { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.eco { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0; padding: 1px 7px; border-radius: 5px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.card h3 { font-family: var(--f-display); font-size: 24px; line-height: 1.12; margin: 0; letter-spacing: -0.015em; text-wrap: balance; }
+.card .path { font-family: var(--f-mono); font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.card p { margin: 0; max-width: 62ch; }
+.card .sub { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; }
+
+.bar { display: flex; height: 22px; border-radius: 5px; overflow: hidden; border: 1px solid var(--res-edge); font-family: var(--f-mono); font-size: 11.5px; font-weight: 600; }
+.bar span { display: flex; align-items: center; justify-content: center; overflow: hidden; white-space: nowrap; }
+.bar .w { background: var(--res-w); color: #1A1D22; }
+.bar .d { background: var(--res-d); color: #14171C; }
+.bar .b { background: var(--res-b); color: #F2F3F5; }
+.bar.mini { height: 12px; font-size: 0; border-radius: 3px; width: 100%; }
+.legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+.legend strong { color: var(--ink); font-weight: 600; }
+.score { font-family: var(--f-mono); font-weight: 600; }
+.score.up { color: var(--good); }
+.score.down { color: var(--danger); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.tx { display: flex; flex-direction: column; gap: 6px; }
+.tx button, .linkbtn { text-align: left; border: 1px dashed var(--rule); background: var(--surface-2); border-radius: 8px; padding: 7px 10px; cursor: pointer; font-family: var(--f-mono); font-size: 12.5px; overflow-wrap: anywhere; }
+.tx button:hover, .linkbtn:hover { border-color: var(--accent); border-style: solid; }
+.tx .via { font-family: var(--f-body); font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); display: block; }
+.note-tx { font-size: 13.5px; color: var(--muted); }
+.trapchip { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--rule); border-radius: 999px; padding: 4px 12px 4px 4px; background: var(--surface); cursor: pointer; font-size: 13px; }
+.trapchip:hover { border-color: var(--accent); }
+.side { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 2px 9px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid var(--res-edge); white-space: nowrap; }
+.side.w { background: var(--chip-w-bg); color: var(--chip-w-fg); }
+.side.b { background: var(--chip-b-bg); color: var(--chip-b-fg); }
+.ext { font-size: 13px; color: var(--accent); text-decoration: none; }
+.ext:hover { text-decoration: underline; }
+
+.evals { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ev { display: inline-flex; flex-direction: column; border: 1px solid var(--rule); border-radius: 8px; padding: 4px 10px; background: var(--surface-2); }
+.ev .m { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.ev .v { font-family: var(--f-mono); font-weight: 600; font-size: 15px; }
+.ev.hot { border-color: var(--danger); background: var(--danger-soft); }
+.arrowsep { color: var(--muted); }
+.cardbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { border: 1px solid var(--rule); background: var(--surface); border-radius: 8px; padding: 7px 12px; cursor: pointer; font-size: 13px; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.btn.primary:hover { color: var(--bg); opacity: 0.9; }
+.callout { border-left: 3px solid var(--danger); padding: 6px 0 6px 12px; }
+.callout.key { border-color: var(--accent); }
+
+/* Next moves table */
+.tblwrap { overflow-x: auto; }
+table.next { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.next th { text-align: left; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 8px 12px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+table.next td { padding: 9px 12px; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+table.next tr:last-child td { border-bottom: 0; }
+table.next tbody tr { cursor: pointer; }
+table.next tbody tr:hover, table.next tbody tr:focus-visible { background: var(--accent-soft); outline: none; }
+table.next .mv { font-family: var(--f-mono); font-weight: 600; white-space: nowrap; }
+table.next .nm { color: var(--muted); font-size: 13px; }
+table.next .gm { font-family: var(--f-mono); font-size: 12.5px; color: var(--muted); white-space: nowrap; text-align: right; }
+table.next td.barc { width: 34%; min-width: 120px; }
+table.next .bar { height: 18px; font-size: 10.5px; }
+.badge { display: inline-block; font-size: 10.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: 1px; white-space: nowrap; }
+.badge.t { background: var(--accent-soft); color: var(--accent); }
+.badge.trap { background: var(--danger-soft); color: var(--danger); }
+.empty { padding: 14px 16px; color: var(--muted); font-size: 14px; }
+
+/* Outline */
+.outline-tools { display: flex; gap: 8px; }
+.outline-tools button { border: 0; background: transparent; color: var(--accent); cursor: pointer; font-size: 12.5px; padding: 0; }
+.outline { padding: 8px 8px 12px; max-height: 620px; overflow: auto; }
+.outline ul { list-style: none; margin: 0; padding-left: 14px; border-left: 1px solid var(--rule); margin-left: 9px; }
+.outline > ul { border-left: 0; padding-left: 0; margin-left: 0; }
+.orow { display: grid; grid-template-columns: 20px minmax(0, 1fr) 72px 46px; gap: 8px; align-items: center; border-radius: 6px; padding: 2px 6px 2px 0; }
+.orow:hover { background: var(--surface-2); }
+.orow.sel { background: var(--accent-soft); }
+.orow .car { width: 20px; height: 24px; border: 0; background: transparent; cursor: pointer; color: var(--muted); font-size: 11px; display: grid; place-items: center; padding: 0; }
+.orow .car:disabled { cursor: default; opacity: 0.25; }
+.orow .lab { border: 0; background: transparent; text-align: left; cursor: pointer; padding: 4px 0; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+.orow .lab .mv { font-family: var(--f-mono); font-size: 13.5px; font-weight: 600; }
+.orow .lab .nm { font-size: 12.5px; color: var(--muted); }
+.orow.sel .lab .mv { color: var(--accent); }
+.orow .gm { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); text-align: right; }
+
+/* Reference sections */
+section.ref { display: flex; flex-direction: column; gap: 14px; }
+.ref-h { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px; }
+.ref-h h2 { font-family: var(--f-display); font-size: 26px; letter-spacing: -0.015em; margin: 0; }
+.ref-h p { margin: 4px 0 0; color: var(--muted); max-width: 70ch; }
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.colh { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+.traplist { display: flex; flex-direction: column; gap: 12px; }
+.trapcard { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.trapcard h4 { margin: 0; font-family: var(--f-display); font-size: 18px; letter-spacing: -0.01em; }
+.trapcard .op { font-size: 12.5px; color: var(--muted); }
+.trapcard .crit { font-family: var(--f-mono); font-size: 13px; overflow-wrap: anywhere; }
+.trapcard .crit .bad { color: var(--danger); font-weight: 600; }
+.trapcard .crit .key { color: var(--accent); font-weight: 600; }
+.trapcard p { margin: 0; font-size: 14px; }
+.trapcard .row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+.swing { font-family: var(--f-mono); font-size: 12.5px; color: var(--muted); }
+
+.txgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.txcard { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.txcard h4 { margin: 0; font-size: 15px; font-weight: 600; }
+.txcard .cross { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); }
+.txcard .eq { color: var(--muted); font-size: 12px; text-align: center; }
+.exits { padding: 6px 16px 14px; }
+.exits li { padding: 6px 0; border-bottom: 1px solid var(--rule); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; font-size: 14px; }
+.exits li:last-child { border-bottom: 0; }
+.exits ul { list-style: none; padding: 0; margin: 0; }
+.exits button { border: 0; background: transparent; padding: 0; color: var(--accent); cursor: pointer; font-family: var(--f-mono); font-size: 13px; text-align: left; }
+
+footer.notes { border-top: 1px solid var(--rule); padding-top: 18px; color: var(--muted); font-size: 13.5px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+footer.notes h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink); margin: 0 0 6px; font-weight: 600; }
+footer.notes p { margin: 0; max-width: 60ch; }
+
+@media (max-width: 900px) {
+  .desk { grid-template-columns: minmax(0, 1fr); }
+  .left { position: static; align-items: stretch; }
+  .boardbox { margin-inline: auto; }
+  .outline { max-height: none; }
+  .cols, .txgrid { grid-template-columns: minmax(0, 1fr); }
+  footer.notes { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 480px) {
+  body { font-size: 14.5px; }
+  .orow { grid-template-columns: 20px minmax(0, 1fr) 52px 40px; gap: 6px; }
+  table.next td.barc { min-width: 90px; }
+  .seg button { padding: 6px 10px; }
+  .card h3 { font-size: 21px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pc { transition: opacity 120ms ease; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>The <span class="e6">…e6</span> Opening Tree</h1>
+      <p>The English with 1.c4 e6 and the French with 1.e4 e6: main lines, the move orders that transpose between them, master results and the traps worth knowing from either side of the board.</p>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Opening">
+        <button id="t-english" type="button" data-tree="english"><span class="mono">1.c4 e6</span> English</button>
+        <button id="t-french" type="button" data-tree="french"><span class="mono">1.e4 e6</span> French</button>
+      </div>
+      <div class="seg" role="group" aria-label="Your colour">
+        <span class="lbl">I play</span>
+        <button id="p-w" type="button" data-persp="w">White</button>
+        <button id="p-b" type="button" data-persp="b">Black</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="desk">
+    <div class="left">
+      <div class="boardbox" id="boardbox">
+        <div class="board" id="board" role="img" aria-label="Chess board"></div>
+        <svg class="arrows" id="arrows" viewBox="0 0 8 8" aria-hidden="true"></svg>
+      </div>
+      <div class="nav" role="group" aria-label="Move navigation">
+        <button id="nav-first" type="button" aria-label="First move">|◀</button>
+        <button id="nav-prev" type="button" aria-label="Previous move">◀</button>
+        <button id="nav-next" type="button" aria-label="Next move">▶</button>
+        <button id="nav-last" type="button" aria-label="Last move">▶|</button>
+        <button id="nav-flip" class="flip" type="button">Flip board</button>
+      </div>
+      <div class="moves" id="moves" aria-label="Moves"></div>
+    </div>
+
+    <div class="right">
+      <div class="panel" id="card"></div>
+      <div class="panel" id="nextpanel">
+        <div class="panel-h"><h2>Next moves</h2><span class="aside" id="next-aside">Hover a row to see the arrow</span></div>
+        <div class="tblwrap" id="next"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-h">
+          <h2 id="outline-title">Full tree</h2>
+          <div class="outline-tools"><button id="ol-open" type="button">Expand all</button><button id="ol-close" type="button">Collapse</button></div>
+        </div>
+        <div class="outline" id="outline" role="tree"></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="ref" id="traps">
+    <div class="ref-h">
+      <div>
+        <h2>Traps</h2>
+        <p id="traps-sub">Each trap was checked with Stockfish 16. The numbers show the evaluation before and after the losing move, in pawns from White's side.</p>
+      </div>
+      <div class="seg" role="group" aria-label="Filter traps">
+        <button id="tf-all" type="button" data-tf="all">Both</button>
+        <button id="tf-english" type="button" data-tf="english">English</button>
+        <button id="tf-french" type="button" data-tf="french">French</button>
+      </div>
+    </div>
+    <div class="cols">
+      <div><h3 class="colh" id="col-set"></h3><div class="traplist" id="trap-set"></div></div>
+      <div><h3 class="colh" id="col-avoid"></h3><div class="traplist" id="trap-avoid"></div></div>
+    </div>
+  </section>
+
+  <section class="ref" id="transpositions">
+    <div class="ref-h">
+      <div>
+        <h2>Transpositions</h2>
+        <p>Different move orders that reach the same position. Matches are found by comparing positions, so every pair below is exact. Cross-over pairs connect the English and French trees.</p>
+      </div>
+    </div>
+    <div class="txgrid" id="txgrid"></div>
+    <div class="panel">
+      <div class="panel-h"><h2>Exits to other openings</h2><span class="aside">Positions that belong to a 1.d4 or Sicilian repertoire</span></div>
+      <div class="exits"><ul id="exits"></ul></div>
+    </div>
+  </section>
+
+  <footer class="notes">
+    <div>
+      <h3>About the win rates</h3>
+      <p>Results are approximate master-level figures (players rated 2200+, over-the-board), rounded to whole percent, as reported by databases such as the Lichess Masters explorer. They were not pulled live. Use the Lichess link on each position for current numbers.</p>
+    </div>
+    <div>
+      <h3>Why a child can outnumber its parent</h3>
+      <p>Game counts belong to the position, not the move order. 1.c4 e6 2.Nc3 d5 3.d4 is the Queen's Gambit Declined, so it carries the QGD's game count even though few games start with 1.c4 e6.</p>
+    </div>
+    <div>
+      <h3>Reading the bars</h3>
+      <p>Light is a White win, grey a draw, dark a Black win. "Your score" counts a win as 1 and a draw as ½ for the colour you picked.</p>
+    </div>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script>
+/* Opening tree data.
+   m   : one or more SAN moves (space separated) played from the parent position
+   n   : opening name, eco: ECO code
+   s   : [White wins, draws, Black wins] in percent, g: approximate games
+         (approximate master-level OTB figures, rounded; transposed positions share one set)
+   note: what the position is about, tx: transposition note, k: children */
+const TREES = {
+  english: {
+    label: "English", first: "1.c4 e6",
+    node: { m: "c4 e6", n: "English Opening: Agincourt Defence", eco: "A13", s: [36, 40, 24], g: 24000,
+      note: "Black keeps every …d5 structure in reserve. White chooses between a Catalan fianchetto, a Queen's Gambit with d4, or a French-style centre with e4.",
+      k: [
+        { m: "Nf3", n: "Agincourt, Réti move order", s: [33, 45, 22], g: 9200,
+          note: "The most popular reply. White delays d4 so Black cannot pin with …Bb4 straight away.",
+          k: [
+            { m: "d5", s: [33, 46, 21], g: 6800, k: [
+              { m: "g3", n: "Agincourt, Catalan setup", s: [33, 47, 20], g: 3400, k: [
+                { m: "Nf6 Bg2", s: [33, 47, 20], g: 2900,
+                  note: "A Catalan without d4. White keeps the option of b3, d4 or a pure Réti.",
+                  k: [
+                    { m: "Be7 O-O O-O", n: "Closed Agincourt", s: [31, 52, 17], g: 1100,
+                      note: "Solid and drawish. With d4 next it becomes a Closed Catalan (E06).",
+                      tx: "Becomes a Closed Catalan (E06) after d4." },
+                    { m: "dxc4", n: "Open Agincourt", s: [36, 40, 24], g: 900,
+                      note: "Black grabs c4. White regains it with Qa4+ or by castling and hitting c4 with Qa4 or Na3. Clinging to the pawn with …b5 is risky.",
+                      k: [
+                        { m: "O-O", s: [37, 38, 25], g: 400, trap: "catalan-b5" },
+                        { m: "Qa4+ Nbd7 Qxc4", s: [34, 44, 22], g: 300,
+                          note: "Simple and safe. White gets the pawn back at once." }
+                      ] },
+                    { m: "c5", s: [34, 42, 24], g: 500, note: "Black takes space; play resembles a Tarrasch with colours reversed." }
+                  ] }
+              ] },
+              { m: "d4", n: "Queen's Gambit Declined (transposed)", eco: "D30", s: [36, 44, 20], g: 41000,
+                tx: "Same position as 1.d4 d5 2.c4 e6 3.Nf3.",
+                k: [
+                  { m: "Nf6 Nc3", n: "QGD, Three Knights", eco: "D37", s: null,
+                    tx: "Same position as 2.Nc3 d5 3.d4 Nf6 4.Nf3." }
+                ] },
+              { m: "b3", n: "Réti, Nimzo-Larsen setup", s: [34, 42, 24], g: 900,
+                note: "White fianchettoes on the long dark diagonal and avoids theory." }
+            ] },
+            { m: "Nf6", s: [34, 43, 23], g: 2000,
+              note: "Flexible. After d4 Black can choose a Queen's Indian (…b6) or a Bogo-Indian (…Bb4+).",
+              k: [
+                { m: "Nc3", s: null, tx: "Same position as 2.Nc3 Nf6 3.Nf3." },
+                { m: "g3 d5 Bg2", s: null, tx: "Same position as 2.Nf3 d5 3.g3 Nf6 4.Bg2." }
+              ] },
+            { m: "b6", n: "Agincourt, Queen's Indian setup", s: [33, 42, 25], g: 600 }
+          ] },
+        { m: "Nc3", n: "Agincourt, Nc3 line", s: [36, 38, 26], g: 7800,
+          note: "Prepares e4 (the Mikenas–Carls) and keeps d4 in reserve for a Queen's Gambit.",
+          k: [
+            { m: "d5", s: [36, 41, 23], g: 4100, k: [
+              { m: "d4", n: "Queen's Gambit Declined (transposed)", eco: "D31", s: [37, 42, 21], g: 70000,
+                tx: "Same position as 1.d4 d5 2.c4 e6 3.Nc3.",
+                k: [
+                  { m: "Nf6", n: "QGD, main line", eco: "D35", s: [37, 44, 19], g: 45000,
+                    tx: "Same position as 1.d4 d5 2.c4 e6 3.Nc3 Nf6.",
+                    k: [
+                      { m: "Bg5", n: "QGD, 4.Bg5", s: [37, 45, 18], g: 18000, k: [
+                        { m: "Be7 e3 O-O Nf3", n: "QGD, Orthodox Defence", eco: "D55", s: [35, 49, 16], g: 5500,
+                          note: "The classical main line. Black plans …h6, …b6 (Tartakower) or …Ne4 (Lasker)." },
+                        { m: "Nbd7", n: "QGD, Elephant Trap line", eco: "D51", s: [37, 43, 20], g: 4000,
+                          note: "Looks like it drops d5 to cxd5 exd5 Nxd5. It does not.",
+                          trap: "elephant",
+                          k: [
+                            { m: "e3 c6 Nf3 Qa5", n: "QGD, Cambridge Springs Defence", eco: "D52", s: [33, 42, 25], g: 900,
+                              note: "The queen pins c3 and eyes g5. Black hopes for …Ne4 and …dxc4.",
+                              trap: "cambridge" }
+                          ] }
+                      ] },
+                      { m: "cxd5 exd5 Bg5", n: "QGD, Exchange Variation", eco: "D35", s: [40, 44, 16], g: 5000,
+                        note: "The Carlsbad structure. White's classic plan is the minority attack with b4–b5.",
+                        tx: "Same position as 2.Nc3 d5 3.cxd5 exd5 4.d4 Nf6 5.Bg5." },
+                      { m: "Nf3", n: "QGD, Three Knights", eco: "D37", s: [35, 46, 19], g: 12000,
+                        note: "Black picks a system: …Be7, …Bb4 (Ragozin), …dxc4 (Vienna) or …c6 (Semi-Slav).",
+                        k: [
+                          { m: "Bb4", n: "Ragozin Defence", eco: "D38", s: [36, 42, 22], g: 2500 },
+                          { m: "c6", n: "Semi-Slav", eco: "D43", s: [36, 40, 24], g: 4500 },
+                          { m: "dxc4", n: "Vienna-style capture", eco: "D37", s: [36, 38, 26], g: 900 }
+                        ] }
+                    ] },
+                  { m: "Be7", n: "QGD, Alatortsev Variation", eco: "D31", s: [37, 45, 18], g: 9000,
+                    note: "Avoids the Bg5 pin. Often met by cxd5 exd5 Bf4." },
+                  { m: "c5", n: "Tarrasch Defence", eco: "D32", s: [40, 36, 24], g: 7000,
+                    note: "Black accepts an isolated d-pawn for free piece play.",
+                    k: [
+                      { m: "cxd5 exd5 Nf3 Nc6 g3", n: "Tarrasch, Rubinstein System", eco: "D34", s: [39, 39, 22], g: 3500,
+                        note: "The fianchetto bishop presses on d5. Main-line theory for over a century." },
+                      { m: "cxd5 cxd4", n: "Schara–Hennig Gambit", eco: "D32", s: [45, 25, 30], g: 500,
+                        note: "A pawn for rapid development. Main line: 5.Qa4+ Bd7 6.Qxd4 exd5 7.Qxd5 Nc6." }
+                    ] }
+                ] },
+              { m: "cxd5 exd5 d4", n: "QGD, Exchange (transposed)", eco: "D31", s: [39, 43, 18], g: 9000,
+                tx: "Same position as 1.d4 d5 2.c4 e6 3.cxd5 exd5 4.Nc3.",
+                k: [
+                  { m: "Nf6 Bg5", s: null, tx: "Same position as 3.d4 Nf6 4.cxd5 exd5 5.Bg5." }
+                ] }
+            ] },
+            { m: "Nf6", s: [36, 38, 26], g: 2200, k: [
+              { m: "e4", n: "Mikenas–Carls Variation", eco: "A18", s: [39, 30, 31], g: 1300,
+                note: "White's most ambitious try. Black chooses between …d5 and the Sicilian-style …c5.",
+                k: [
+                  { m: "d5 e5 d4 exf6 dxc3 bxc3 Qxf6", n: "Mikenas–Carls main line", eco: "A18", s: [40, 32, 28], g: 350,
+                    note: "Material is level. Black has the better structure, White the bishop pair and the centre after d4." },
+                  { m: "c5 e5 Ng8", n: "Mikenas–Carls, Sicilian Variation", eco: "A18", s: [42, 26, 32], g: 300,
+                    note: "Sharp. 5.Nf3 Nc6 6.d4 cxd4 7.Nxd4 Nxe5 8.Ndb5 is the critical test." }
+                ] },
+              { m: "d4", n: "Indian Game (transposed)", eco: "E20", s: [38, 40, 22], g: 90000,
+                tx: "Same position as 1.d4 Nf6 2.c4 e6 3.Nc3.",
+                k: [
+                  { m: "Bb4", n: "Nimzo-Indian Defence", eco: "E20", s: [36, 42, 22], g: 60000,
+                    tx: "Transposes to the Nimzo-Indian." },
+                  { m: "d5", s: null, tx: "Same position as 2…d5 3.d4 Nf6 (QGD main line)." }
+                ] },
+              { m: "Nf3", s: [33, 44, 23], g: 600, note: "Quiet. Black can play …d5, …Bb4 or …b6." }
+            ] },
+            { m: "Bb4", n: "Agincourt, Kmoch Variation", eco: "A13", s: [35, 36, 29], g: 700,
+              note: "A Nimzo-style pin before White has committed to d4. White usually answers Qc2, Qb3 or g3." }
+          ] },
+        { m: "d4", n: "Horwitz Defence (transposed)", eco: "A40", s: [37, 38, 25], g: 52000,
+          tx: "Same position as 1.d4 e6 2.c4.",
+          note: "Now Black can head for a Dutch, an English Defence or a Queen's Gambit.",
+          k: [
+            { m: "Nf6 Nc3", s: null, tx: "Same position as 2.Nc3 Nf6 3.d4 (Indian Game)." },
+            { m: "d5 Nc3", s: null, tx: "Same position as 2.Nc3 d5 3.d4 (QGD)." },
+            { m: "Bb4+ Bd2", n: "Keres Defence", eco: "A40", s: [35, 41, 24], g: 2200,
+              note: "Black follows up with …Qe7 or trades with …Bxd2+." },
+            { m: "f5", n: "Dutch Defence", eco: "A84", s: [41, 30, 29], g: 3000,
+              note: "Stonewall or Leningrad structures. White usually fianchettoes with g3." },
+            { m: "b6", n: "English Defence", eco: "A40", s: [43, 27, 30], g: 2500,
+              note: "Black attacks e4 from b7 and invites White to build a big centre.",
+              k: [
+                { m: "e4 Bb7", s: [44, 26, 30], g: 1300, k: [
+                  { m: "Bd3 f5", n: "English Defence, Bd3 f5", s: [45, 23, 32], g: 250,
+                    note: "Sharp. Black must not grab on g2 after 5.exf5.",
+                    trap: "english-def" },
+                  { m: "Nc3 Bb4", s: [43, 27, 30], g: 500, note: "Black pressures e4 twice." }
+                ] }
+              ] }
+          ] },
+        { m: "g3", n: "Agincourt, fianchetto first", s: [34, 43, 23], g: 3200,
+          note: "Usually transposes to the Catalan setup of 2.Nf3.",
+          k: [
+            { m: "d5 Bg2 Nf6 Nf3", s: null, tx: "Same position as 2.Nf3 d5 3.g3 Nf6 4.Bg2." }
+          ] },
+        { m: "e4", n: "Franco-English", eco: "A13", s: [38, 30, 32], g: 1400,
+          tx: "Same position as 1.e4 e6 2.c4 (French, Steiner Variation).",
+          note: "Crosses over into French territory.",
+          k: [
+            { m: "d5", s: [38, 30, 32], g: 1100, k: [
+              { m: "e5", n: "Franco-English, advance", s: [39, 29, 32], g: 400,
+                tx: "Same position as 1.e4 e6 2.c4 d5 3.e5." },
+              { m: "cxd5 exd5 exd5", n: "Franco-English, exchange", s: [36, 35, 29], g: 450,
+                tx: "Same position as 1.e4 e6 2.c4 d5 3.exd5 exd5 4.cxd5." }
+            ] },
+            { m: "c5", s: [37, 32, 31], g: 200, tx: "A Sicilian: same position as 1.e4 c5 2.c4 e6." }
+          ] }
+      ] }
+  },
+
+  french: {
+    label: "French", first: "1.e4 e6",
+    node: { m: "e4 e6", n: "French Defence", eco: "C00", s: [37, 34, 29], g: 190000,
+      note: "Black prepares …d5 and accepts a cramped light-squared bishop in exchange for a rock-solid centre and counterplay with …c5.",
+      k: [
+        { m: "d4 d5", n: "French Defence, main line", eco: "C00", s: [37, 35, 28], g: 148000,
+          note: "White must decide what to do about the attack on e4.",
+          k: [
+            { m: "Nc3", n: "Paulsen Variation", eco: "C10", s: [38, 34, 28], g: 68000,
+              note: "Defends e4 with a piece and keeps the tension.",
+              k: [
+                { m: "Bb4", n: "Winawer Variation", eco: "C15", s: [39, 31, 30], g: 27000,
+                  note: "Black pins c3 and is ready to give the bishop to double White's pawns.",
+                  k: [
+                    { m: "e5 c5 a3", n: "Winawer, Advance", eco: "C16", s: [40, 29, 31], g: 15000, k: [
+                      { m: "Bxc3+ bxc3 Ne7", n: "Winawer main line", eco: "C18", s: [40, 28, 32], g: 9000,
+                        note: "White has the bishop pair and a dark-square grip. Black has the better structure.",
+                        k: [
+                          { m: "Qg4", n: "Winawer, 7.Qg4", eco: "C18", s: [41, 25, 34], g: 4000,
+                            note: "The sharpest try. Black must give up g7 or castle into the attack.",
+                            k: [
+                              { m: "Qc7 Qxg7 Rg8 Qxh7 cxd4", n: "Poisoned Pawn Variation", eco: "C18", s: [41, 22, 37], g: 1000,
+                                note: "Both sides are playing for a win. 10.Ne2 is the main move; recapturing on d4 loses at once.",
+                                trap: "poisoned" },
+                              { m: "O-O", s: [40, 29, 31], g: 900, note: "Black keeps g7 and lets White build an attack on the kingside." },
+                              { m: "Kf8", s: [39, 29, 32], g: 600, note: "Keeps g7 at the cost of castling rights." }
+                            ] },
+                          { m: "Nf3", n: "Winawer, positional line", eco: "C19", s: [38, 33, 29], g: 3500,
+                            note: "White develops and keeps the long-term trumps." },
+                          { m: "h4", eco: "C19", s: [42, 27, 31], g: 1000, note: "Gains space and plans h5–h6 to loosen Black's kingside." }
+                        ] },
+                      { m: "Ba5", n: "Winawer, Armenian Variation", eco: "C17", s: [40, 27, 33], g: 2500,
+                        note: "Black keeps the bishop. Main line: 6.b4 cxb4 7.Qg4." }
+                    ] },
+                    { m: "exd5 exd5", n: "Winawer, Exchange", eco: "C15", s: [30, 52, 18], g: 2000, note: "Symmetrical and drawish." },
+                    { m: "a3", n: "Winawer, Kondratiyev", eco: "C15", s: [36, 32, 32], g: 1200 }
+                  ] },
+                { m: "Nf6", n: "Classical Variation", eco: "C11", s: [38, 35, 27], g: 25000,
+                  note: "Black counter-attacks e4 with a piece.",
+                  k: [
+                    { m: "e5 Nfd7 f4 c5 Nf3 Nc6 Be3", n: "Classical, Steinitz Variation", eco: "C11", s: [39, 30, 31], g: 5000,
+                      note: "White's big centre against Black's pressure on d4. Long castling for White is common." },
+                    { m: "Bg5", s: [38, 36, 26], g: 12000, k: [
+                      { m: "Be7 e5 Nfd7 Bxe7 Qxe7 f4", n: "Classical main line", eco: "C14", s: [39, 38, 23], g: 2500 },
+                      { m: "Be7 e5 Nfd7 h4", n: "Alekhine–Chatard Attack", eco: "C13", s: [44, 26, 30], g: 1000,
+                        note: "A pawn sacrifice. 6…Bxg5 7.hxg5 Qxg5 8.Nh3 opens the h-file." },
+                      { m: "Bb4 e5 h6 Bd2 Bxc3 bxc3 Ne4 Qg4", n: "McCutcheon Variation", eco: "C12", s: [42, 26, 32], g: 900,
+                        note: "White hits g7. Black's only good answer is 8…g6.",
+                        trap: "mccutcheon" },
+                      { m: "dxe4 Nxe4", n: "Burn Variation", eco: "C11", s: [37, 39, 24], g: 3500,
+                        note: "Black releases the tension and plays for …Be7 or …Nbd7 with a solid position." }
+                    ] }
+                  ] },
+                { m: "dxe4 Nxe4", n: "Rubinstein Variation", eco: "C10", s: [39, 38, 23], g: 12000,
+                  tx: "Same position as 3.Nd2 dxe4 4.Nxe4.",
+                  note: "Black gives up the centre for quick, safe development.",
+                  k: [
+                    { m: "Nd7 Nf3 Ngf6 Nxf6+ Nxf6", n: "Rubinstein main line", eco: "C10", s: [38, 41, 21], g: 4500 },
+                    { m: "Bd7", n: "Fort Knox Variation", eco: "C10", s: [39, 38, 23], g: 2500,
+                      note: "…Bc6 next trades off Black's problem bishop." }
+                  ] }
+              ] },
+            { m: "Nd2", n: "Tarrasch Variation", eco: "C03", s: [37, 39, 24], g: 40000,
+              note: "Avoids the Winawer pin and keeps c3 free for a pawn.",
+              k: [
+                { m: "Nf6 e5 Nfd7 Bd3 c5 c3 Nc6 Ne2", n: "Tarrasch, Closed main line", eco: "C06", s: [39, 35, 26], g: 4000,
+                  note: "White's knight goes to e2 to support d4. Black hits back with …cxd4 and …f6." },
+                { m: "c5", n: "Tarrasch, Open Variation", eco: "C07", s: [36, 40, 24], g: 14000, k: [
+                  { m: "exd5 Qxd5", eco: "C07", s: [36, 42, 22], g: 6000, note: "Black's queen is active but can be chased with Ngf3, Bc4 and Nb3." },
+                  { m: "exd5 exd5", eco: "C08", s: [36, 42, 22], g: 5000, note: "Black accepts an isolated d-pawn." }
+                ] },
+                { m: "Be7", n: "Tarrasch, Morozevich Variation", eco: "C03", s: [36, 41, 23], g: 4000 },
+                { m: "Nc6", n: "Tarrasch, Guimard Variation", eco: "C04", s: [40, 33, 27], g: 1500 },
+                { m: "dxe4 Nxe4", s: null, tx: "Same position as 3.Nc3 dxe4 4.Nxe4 (Rubinstein)." }
+              ] },
+            { m: "e5", n: "Advance Variation", eco: "C02", s: [35, 34, 31], g: 25000,
+              note: "White grabs space and locks the centre. Black attacks the d4 base with …c5, …Nc6 and …Qb6.",
+              k: [
+                { m: "c5 c3 Nc6 Nf3", s: [35, 35, 30], g: 15000, k: [
+                  { m: "Qb6", eco: "C02", s: [35, 34, 31], g: 10000, k: [
+                    { m: "a3", n: "Advance, Euwe Variation", eco: "C02", s: [37, 35, 28], g: 5000,
+                      note: "Prepares b4. Black often answers 6…c4 or 6…Nh6." },
+                    { m: "Bd3 cxd4 cxd4", n: "Advance, Milner-Barry Gambit", eco: "C02", s: [32, 28, 40], g: 1500,
+                      note: "White offers d4 for development. 7…Bd7 is correct; 7…Nxd4? walks into a queen trap.",
+                      trap: "milner-barry" },
+                    { m: "Be2", eco: "C02", s: [35, 35, 30], g: 3000 }
+                  ] },
+                  { m: "Bd7", n: "Advance, Euwe Defence", eco: "C02", s: [34, 37, 29], g: 4000 }
+                ] },
+                { m: "c5 Qg4", n: "Advance, Nimzowitsch Gambit", eco: "C02", s: [30, 26, 44], g: 300,
+                  note: "An old idea that gives up d4. Black does well by striking back with …f5.",
+                  trap: "advance-qg4" },
+                { m: "c5 Nf3", eco: "C02", s: [33, 33, 34], g: 2500, note: "Gives up d4 for development." }
+              ] },
+            { m: "exd5 exd5", n: "Exchange Variation", eco: "C01", s: [30, 51, 19], g: 14000,
+              note: "Symmetrical and often drawish. White's ambitious try is c4.",
+              k: [
+                { m: "c4", n: "Exchange, Monte Carlo", eco: "C01", s: [36, 34, 30], g: 2500, note: "Leads to isolated-pawn positions." },
+                { m: "Nf3", eco: "C01", s: [29, 54, 17], g: 4500 },
+                { m: "Bd3", eco: "C01", s: [29, 54, 17], g: 4000 }
+              ] }
+          ] },
+        { m: "d3", n: "King's Indian Attack", eco: "C00", s: [37, 33, 30], g: 14000,
+          note: "White sets up a reversed King's Indian and attacks on the kingside after e5.",
+          k: [
+            { m: "d5 Nd2 Nf6 Ngf3 c5 g3 Nc6 Bg2 Be7 O-O O-O Re1", n: "King's Indian Attack, main setup", eco: "C00", s: [38, 32, 30], g: 1500,
+              note: "White plays e5, Nf1, h4 and attacks. Black races on the queenside with …b5–b4." }
+          ] },
+        { m: "Nf3 d5", s: [37, 32, 31], g: 6000, k: [
+          { m: "Nc3", n: "French, Two Knights", eco: "C00", s: [38, 30, 32], g: 1500,
+            tx: "Same position as 2.Nc3 d5 3.Nf3." },
+          { m: "e5 c5 b4", n: "French, Wing Gambit", eco: "C00", s: [36, 26, 38], g: 300 }
+        ] },
+        { m: "Nc3 d5", s: [36, 31, 33], g: 3000, k: [
+          { m: "Nf3", s: null, tx: "Same position as 2.Nf3 d5 3.Nc3 (Two Knights)." },
+          { m: "d4", s: null, tx: "Same position as 2.d4 d5 3.Nc3 (Paulsen)." }
+        ] },
+        { m: "Qe2", n: "Chigorin Variation", eco: "C00", s: [37, 30, 33], g: 3000,
+          note: "Discourages …d5 for the moment because exd5 would open the e-file." },
+        { m: "c4", n: "Steiner Variation", eco: "C00", s: null,
+          tx: "Same position as 1.c4 e6 2.e4 (Franco-English).",
+          k: [
+            { m: "d5", s: null, k: [
+              { m: "e5", s: null, tx: "Same position as 1.c4 e6 2.e4 d5 3.e5." },
+              { m: "exd5 exd5 cxd5", s: null, tx: "Same position as 1.c4 e6 2.e4 d5 3.cxd5 exd5 4.exd5." }
+            ] }
+          ] }
+      ] }
+  }
+};
+
+/* Traps. side = who sets (and profits from) the trap. line = full game from move 1.
+   bad = ply index (1-based) of the losing move, key = ply index of the punishing move.
+   evals are Stockfish 16 scores (pawns, White's view) checked at depth 16–20. */
+const TRAPS = [
+  { id: "milner-barry", mark: "??", tree: "french", side: "w", title: "Milner-Barry queen trap",
+    opening: "French, Advance (Milner-Barry Gambit)",
+    line: "e4 e6 d4 d5 e5 c5 c3 Nc6 Nf3 Qb6 Bd3 cxd4 cxd4 Nxd4 Nxd4 Qxd4 Bb5+", bad: 16, key: 17,
+    evals: [["7.cxd4", 0.0], ["7…Nxd4?", 2.9], ["8…Qxd4??", 6.7]],
+    idea: "Black grabs d4 twice. 9.Bb5+ uncovers the d1 queen on the d-file and Black's queen on d4 is lost.",
+    avoid: "7…Bd7 keeps the balance; the gambit is only worth a pawn if Black is greedy." },
+  { id: "mccutcheon", mark: "?", tree: "french", side: "w", title: "McCutcheon: don't castle",
+    opening: "French, Classical (McCutcheon)",
+    line: "e4 e6 d4 d5 Nc3 Nf6 Bg5 Bb4 e5 h6 Bd2 Bxc3 bxc3 Ne4 Qg4 O-O Bxh6 g6 Bxf8 Qxf8", bad: 16, key: 17,
+    evals: [["8.Qg4", 0.5], ["8…O-O?", 4.8], ["10…Qxf8", 3.8]],
+    idea: "Castling walks into Bxh6. Mate on g7 is threatened, so Black must block with …g6 and the rook on f8 falls.",
+    avoid: "8…g6 is the main line; 8…Kf8 is also played." },
+  { id: "catalan-b5", mark: "?", tree: "english", side: "w", title: "Catalan long-diagonal trap",
+    opening: "English, Agincourt (Open Catalan setup)",
+    line: "c4 e6 Nf3 d5 g3 Nf6 Bg2 dxc4 O-O b5 a4 c6 axb5 cxb5 Ne5 Nd5 d3 Nd7 dxc4", bad: 12, key: 15,
+    evals: [["5…b5", 0.8], ["6…c6?", 1.8], ["10.dxc4", 2.7]],
+    idea: "Black defends c4 with …b5 and …c6. After axb5 cxb5, Ne5 lines up the g2 bishop on the a8 rook and the d5 knight is pinned. White regains c4 and keeps a winning initiative.",
+    avoid: "6…b4 keeps the pawn chain intact; simpler still is 5…a6 or 5…Be7 without trying to keep c4." },
+  { id: "english-def", mark: "?", tree: "english", side: "w", title: "English Defence: poisoned g2",
+    opening: "English Defence (via 2.d4 b6)",
+    line: "c4 e6 d4 b6 e4 Bb7 Bd3 f5 exf5 Bxg2 Qh5+ g6 fxg6 Bg7 gxh7+ Kf8 Bg5", bad: 10, key: 11,
+    evals: [["5.exf5", 1.1], ["5…Bxg2?", 2.0], ["9.Bg5", 2.2]],
+    idea: "Taking the g2 pawn opens h5 for the queen. The pawn on h7 and the pin on g8 give White a lasting attack.",
+    avoid: "5…exf5 is the safer recapture." },
+  { id: "elephant", mark: "??", tree: "english", side: "b", title: "Elephant Trap",
+    opening: "QGD via 1.c4 e6 2.Nc3 d5 3.d4",
+    line: "c4 e6 Nc3 d5 d4 Nf6 Bg5 Nbd7 cxd5 exd5 Nxd5 Nxd5 Bxd8 Bb4+ Qd2 Bxd2+ Kxd2 Kxd8", bad: 11, key: 12,
+    evals: [["5…exd5", 0.4], ["6.Nxd5??", -3.5], ["9…Kxd8", -3.4]],
+    idea: "The d5 pawn looks pinned to the queen. It isn't: …Nxd5 gives up the queen, then …Bb4+ wins White's queen back and Black is a piece up.",
+    avoid: "6.e3 or 6.Nf3 keeps an edge for White." },
+  { id: "cambridge", mark: "??", tree: "english", side: "b", title: "Cambridge Springs double attack",
+    opening: "QGD via the English",
+    line: "c4 e6 Nc3 d5 d4 Nf6 Bg5 Nbd7 e3 c6 Nf3 Qa5 Bd3 Ne4 Qc2 Nxg5 Nxg5 dxc4", bad: 15, key: 18,
+    evals: [["7…Ne4", 0.1], ["8.Qc2??", -3.5], ["9…dxc4", -4.4]],
+    idea: "After …Nxg5 Nxg5 dxc4, the queen on a5 hits the knight on g5 along the fifth rank while the pawn hits d3. White loses a piece.",
+    avoid: "8.Bxe4 dxe4 is level; 7.Nd2 is the main line." },
+  { id: "poisoned", mark: "??", tree: "french", side: "b", title: "Poisoned Pawn: the c3 check",
+    opening: "French, Winawer Poisoned Pawn",
+    line: "e4 e6 d4 d5 Nc3 Bb4 e5 c5 a3 Bxc3+ bxc3 Ne7 Qg4 Qc7 Qxg7 Rg8 Qxh7 cxd4 cxd4 Qc3+ Kd1 Qxd4+ Qd3 Qxa1", bad: 19, key: 20,
+    evals: [["9…cxd4", 0.7], ["10.cxd4??", -3.7], ["12…Qxa1", -4.1]],
+    idea: "Recapturing with the c-pawn opens c3. …Qc3+ forks the king and the a1 rook.",
+    avoid: "10.Ne2 is the main line; 10.Kd1 is the alternative." },
+  { id: "advance-qg4", mark: "?", tree: "french", side: "b", title: "Nimzowitsch Gambit: …f5 bait",
+    opening: "French, Advance (4.Qg4)",
+    line: "e4 e6 d4 d5 e5 c5 Qg4 cxd4 Nf3 Nc6 Bd3 f5 exf6 Nxf6", bad: 13, key: 14,
+    evals: [["6…f5", 0.2], ["7.exf6?", -1.8], ["7…Nxf6", -1.9]],
+    idea: "Taking en passant gives up e5, Black's knight lands on f6 with tempo and the centre is Black's.",
+    avoid: "7.Qg3 keeps e5 and the balance." }
+];
+
+</script>
+<script>
+(function () {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage unavailable */ } }
+  };
+
+  /* ---------- Build the index ---------- */
+  const NODES = {}, GROUPS = {}, ROOT = {};
+  let seq = 0;
+  for (const [tid, t] of Object.entries(TREES)) {
+    const walk = (node, parent, path) => {
+      node.id = "n" + seq++;
+      node.tree = tid;
+      node.parent = parent;
+      node.sans = node.m.split(" ");
+      node.start = path.length;
+      node.path = path.concat(node.sans);
+      node.end = node.path.length;
+      const g = new Chess();
+      node.path.forEach((m) => g.move(m));
+      node.fen = g.fen();
+      node.key = node.fen.split(" ").slice(0, 3).join(" ");
+      (GROUPS[node.key] = GROUPS[node.key] || []).push(node);
+      NODES[node.id] = node;
+      node.kids = node.k || [];
+      node.kids.forEach((c) => walk(c, node, node.path));
+    };
+    walk(t.node, null, []);
+    ROOT[tid] = t.node;
+  }
+  const stats = (n) => {
+    if (n.s) return { s: n.s, g: n.g };
+    const o = GROUPS[n.key].find((x) => x.s);
+    return o ? { s: o.s, g: o.g } : null;
+  };
+  const twins = (n) => GROUPS[n.key].filter((x) => x !== n);
+  const gamesOf = (n) => (stats(n) || { g: 0 }).g || 0;
+  const sortedKids = (n) => n.kids.slice().sort((a, b) => gamesOf(b) - gamesOf(a));
+  const TRAP = Object.fromEntries(TRAPS.map((t) => [t.id, t]));
+  const trapsAt = (n) => {
+    const out = [];
+    if (n.trap) out.push(TRAP[n.trap]);
+    twins(n).forEach((t) => { if (t.trap && !out.includes(TRAP[t.trap])) out.push(TRAP[t.trap]); });
+    return out;
+  };
+  const nameOf = (n) => { let x = n; while (x && !x.n) x = x.parent; return x ? x.n : ""; };
+  const ecoOf = (n) => { let x = n; while (x && !x.eco) x = x.parent; return x ? x.eco : ""; };
+  const hasTrapBelow = (n) => !!n.trap || n.kids.some(hasTrapBelow);
+
+  /* ---------- Notation helpers ---------- */
+  const plyLabel = (i, san, force) => {
+    const no = Math.ceil(i / 2);
+    return i % 2 ? no + "." + san : force ? no + "…" + san : san;
+  };
+  const seqLabel = (sans, startPly) => sans.map((s, j) => plyLabel(startPly + j + 1, s, j === 0)).join(" ");
+  const fmtGames = (g) => (!g ? "–" : g >= 1000 ? "≈" + Math.round(g / 1000) + "k" : "≈" + Math.round(g / 50) * 50);
+  const fmtEval = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1);
+  const scoreFor = (s, side) => (side === "w" ? s[0] + s[1] / 2 : s[2] + s[1] / 2);
+
+  function lineInfo(sans) {
+    const g = new Chess();
+    const out = [{ fen: g.fen() }];
+    for (const s of sans) {
+      const r = g.move(s);
+      out.push({ san: r.san, from: r.from, to: r.to, fen: g.fen() });
+    }
+    return out;
+  }
+  function moveSquares(fen, san) {
+    const g = new Chess(fen);
+    const r = g.move(san);
+    return r ? { from: r.from, to: r.to } : null;
+  }
+
+  /* ---------- State ---------- */
+  const state = {
+    tree: "french", persp: "w", flip: false, flipTouched: false,
+    mode: "tree", nodeId: null, trapId: null,
+    line: [], ply: 0, open: new Set(), hover: null, tf: "all"
+  };
+  const savedTree = store.get("e6tree.tree");
+  const savedPersp = store.get("e6tree.persp");
+  const hash = (location.hash || "").replace("#", "");
+  if (hash === "english" || hash === "french") state.tree = hash;
+  else if (savedTree === "english" || savedTree === "french") state.tree = savedTree;
+  if (savedPersp === "w" || savedPersp === "b") state.persp = savedPersp;
+  state.flip = state.persp === "b";
+
+  const curNode = () => NODES[state.nodeId];
+  // In tree mode the card shows the deepest node on the selected path that ends at or before the current ply.
+  function nodeAtPly() {
+    let n = curNode();
+    while (n.parent && n.end > state.ply) n = n.parent;
+    return n;
+  }
+
+  function openPath(n) { for (let x = n; x; x = x.parent) state.open.add(x.id); }
+  function selectNode(n, ply) {
+    if (n.tree !== state.tree) { state.tree = n.tree; store.set("e6tree.tree", n.tree); }
+    state.mode = "tree";
+    state.trapId = null;
+    state.nodeId = n.id;
+    state.line = lineInfo(n.path);
+    state.ply = ply == null ? n.end : ply;
+    state.hover = null;
+    openPath(n);
+    render();
+  }
+  function openTrap(t, ply) {
+    state.mode = "trap";
+    state.trapId = t.id;
+    if (t.tree !== state.tree) { state.tree = t.tree; store.set("e6tree.tree", t.tree); }
+    state.line = lineInfo(t.line.split(" "));
+    state.ply = ply == null ? t.bad - 1 : ply;
+    state.hover = null;
+    render();
+    $("#boardbox").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
+  }
+  function setTree(tid) {
+    state.tree = tid;
+    store.set("e6tree.tree", tid);
+    const r = ROOT[tid];
+    state.open = new Set([r.id]);
+    selectNode(r);
+  }
+
+  /* ---------- Board ---------- */
+  const GLYPH = { k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟" };
+  function drawBoard() {
+    const cur = state.line[state.ply];
+    const g = new Chess(cur.fen);
+    const b = g.board();
+    const files = "abcdefgh";
+    const html = [];
+    for (let vr = 0; vr < 8; vr++) {
+      for (let vf = 0; vf < 8; vf++) {
+        const r = state.flip ? 7 - vr : vr;
+        const f = state.flip ? 7 - vf : vf;
+        const sq = files[f] + (8 - r);
+        const light = (r + f) % 2 === 0;
+        const p = b[r][f];
+        let cls = "sq " + (light ? "l" : "d");
+        if (cur.from === sq) cls += " from";
+        if (cur.to === sq) cls += " to";
+        let inner = "";
+        if (vr === 7) inner += '<span class="coord f">' + files[f] + "</span>";
+        if (vf === 0) inner += '<span class="coord r">' + (8 - r) + "</span>";
+        if (p) inner += '<span class="pc ' + p.color + '">' + GLYPH[p.type] + "︎</span>";
+        html.push('<div class="' + cls + '">' + inner + "</div>");
+      }
+    }
+    $("#board").innerHTML = html.join("");
+    $("#board").setAttribute("aria-label", state.ply ? "Position after " + plyLabel(state.ply, cur.san, true) : "Starting position");
+    drawArrows();
+  }
+  function sqCenter(sq) {
+    let f = "abcdefgh".indexOf(sq[0]);
+    let r = 8 - +sq[1];
+    if (state.flip) { f = 7 - f; r = 7 - r; }
+    return [f + 0.5, r + 0.5];
+  }
+  function arrowSvg(m, color, w) {
+    const [x1, y1] = sqCenter(m.from);
+    const [x2, y2] = sqCenter(m.to);
+    const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy);
+    const ux = dx / len, uy = dy / len;
+    const head = 0.42, hw = w * 1.9;
+    const sx = x1 + ux * 0.18, sy = y1 + uy * 0.18;
+    const bx = x2 - ux * head, by = y2 - uy * head;
+    const px = -uy, py = ux;
+    return '<line x1="' + sx + '" y1="' + sy + '" x2="' + bx + '" y2="' + by + '" stroke="' + color + '" stroke-width="' + w + '" stroke-linecap="round"/>' +
+      '<polygon fill="' + color + '" points="' + (x2 - ux * 0.06) + "," + (y2 - uy * 0.06) + " " + (bx + px * hw) + "," + (by + py * hw) + " " + (bx - px * hw) + "," + (by - py * hw) + '"/>';
+  }
+  function drawArrows() {
+    const css = getComputedStyle(document.documentElement);
+    const C = (v) => css.getPropertyValue(v).trim();
+    const out = [];
+    const cur = state.line[state.ply];
+    if (state.hover) {
+      out.push(arrowSvg(state.hover, C("--arrow"), 0.16));
+    } else if (state.mode === "trap") {
+      const t = TRAP[state.trapId];
+      const nx = state.line[state.ply + 1];
+      if (nx) {
+        const color = state.ply + 1 === t.bad ? C("--arrow-bad") : state.ply + 1 === t.key ? C("--arrow") : C("--arrow-soft");
+        out.push(arrowSvg(nx, color, 0.15));
+      }
+    } else {
+      const n = curNode();
+      if (state.ply < state.line.length - 1) {
+        out.push(arrowSvg(state.line[state.ply + 1], C("--arrow-soft"), 0.14));
+      } else {
+        const k = sortedKids(n)[0];
+        if (k) { const m = moveSquares(cur.fen, k.sans[0]); if (m) out.push(arrowSvg(m, C("--arrow-soft"), 0.14)); }
+      }
+    }
+    $("#arrows").innerHTML = out.join("");
+  }
+
+  /* ---------- Move list ---------- */
+  function drawMoves() {
+    const t = state.mode === "trap" ? TRAP[state.trapId] : null;
+    const parts = ['<button type="button" class="start' + (state.ply === 0 ? " cur" : "") + '" data-ply="0">Start</button>'];
+    state.line.forEach((x, i) => {
+      if (!i) return;
+      let cls = i === state.ply ? "cur" : i > state.ply ? "fut" : "";
+      if (t && i === t.bad) cls += " bad";
+      if (t && i === t.key) cls += " key";
+      parts.push('<button type="button" class="' + cls + '" data-ply="' + i + '">' + esc(plyLabel(i, x.san, false)) + "</button>");
+    });
+    $("#moves").innerHTML = parts.join("");
+    const last = state.line.length - 1;
+    const n = state.mode === "tree" ? curNode() : null;
+    $("#nav-first").disabled = state.ply === 0;
+    $("#nav-prev").disabled = state.ply === 0;
+    $("#nav-next").disabled = state.ply >= last && !(n && n.kids.length);
+    $("#nav-last").disabled = state.ply >= last;
+  }
+
+  /* ---------- Position card ---------- */
+  function barHtml(s, mini) {
+    if (!s) return '<div class="bar' + (mini ? " mini" : "") + '"><span class="d" style="width:100%">no data</span></div>';
+    const lab = (v) => (mini || v < 9 ? "" : v + "%");
+    return '<div class="bar' + (mini ? " mini" : "") + '" aria-label="White ' + s[0] + "%, draws " + s[1] + "%, Black " + s[2] + '%">' +
+      '<span class="w" style="width:' + s[0] + '%">' + lab(s[0]) + "</span>" +
+      '<span class="d" style="width:' + s[1] + '%">' + lab(s[1]) + "</span>" +
+      '<span class="b" style="width:' + s[2] + '%">' + lab(s[2]) + "</span></div>";
+  }
+  function scoreHtml(s) {
+    if (!s) return '<span class="score">–</span>';
+    const v = scoreFor(s, state.persp);
+    const cls = v >= 52 ? "up" : v <= 48 ? "down" : "";
+    return '<span class="score ' + cls + ' num">' + v.toFixed(v % 1 ? 1 : 0) + "%</span>";
+  }
+  const sideChip = (side) => '<span class="side ' + side + '">' + (side === "w" ? "White's trap" : "Black's trap") + "</span>";
+  const lichess = (fen) => "https://lichess.org/analysis/standard/" + fen.replace(/ /g, "_");
+
+  function drawCard() {
+    const el = $("#card");
+    if (state.mode === "trap") return drawTrapCard(el);
+    const n = nodeAtPly();
+    const st = stats(n);
+    const name = nameOf(n);
+    const eco = ecoOf(n);
+    const mid = state.ply !== n.end;
+    const cur = state.line[state.ply];
+    const mine = state.persp === "w" ? "White" : "Black";
+    let h = '<div class="card">';
+    h += '<div class="eyebrow">' + (eco ? '<span class="eco">' + esc(eco) + "</span>" : "") + "<span>" + esc(TREES[n.tree].label) + " tree</span>" + (mid ? "<span>· viewing an earlier move</span>" : "") + "</div>";
+    h += "<h3>" + esc(name || TREES[n.tree].label) + "</h3>";
+    h += '<div class="path">' + esc(seqLabel(n.path, 0)) + "</div>";
+    if (st) {
+      h += "<div>" + barHtml(st.s, false) + '<div class="legend" style="margin-top:6px"><span>White <strong class="num">' + st.s[0] + "%</strong> · Draw <strong class=\"num\">" + st.s[1] + "%</strong> · Black <strong class=\"num\">" + st.s[2] + '%</strong></span><span><strong class="num">' + fmtGames(st.g) + "</strong> master games</span></div>";
+      h += '<div class="legend" style="margin-top:2px"><span>Your score as ' + mine + ": " + scoreHtml(st.s) + "</span></div></div>";
+    }
+    if (n.note) h += "<p>" + esc(n.note) + "</p>";
+    const tw = twins(n);
+    if (tw.length || n.tx) {
+      h += '<div><div class="sub">Transpositions</div><div class="tx">';
+      tw.forEach((t) => {
+        h += '<button type="button" data-node="' + t.id + '"><span class="via">Same position in the ' + esc(TREES[t.tree].label) + " tree via</span>" + esc(seqLabel(t.path, 0)) + "</button>";
+      });
+      if (n.tx && !tw.length) h += '<div class="note-tx">' + esc(n.tx) + "</div>";
+      h += "</div></div>";
+    }
+    const tr = trapsAt(n);
+    if (tr.length) {
+      h += '<div><div class="sub">Traps from this position</div><div class="chips">';
+      tr.forEach((t) => { h += '<button type="button" class="trapchip" data-trap="' + t.id + '">' + sideChip(t.side) + esc(t.title) + "</button>"; });
+      h += "</div></div>";
+    }
+    h += '<a class="ext" href="' + lichess(cur.fen) + '" target="_blank" rel="noopener">Check live numbers in the Lichess explorer ↗</a>';
+    h += "</div>";
+    el.innerHTML = h;
+  }
+
+  function drawTrapCard(el) {
+    const t = TRAP[state.trapId];
+    const mv = state.line;
+    const badLab = plyLabel(t.bad, mv[t.bad].san, true) + (t.mark || "?");
+    const keyLab = plyLabel(t.key, mv[t.key].san, true);
+    let stage;
+    if (state.ply < t.bad) stage = '<div class="callout">Next comes the mistake: <span class="mono">' + esc(badLab) + "</span>. Step forward to see it.</div>";
+    else if (state.ply < t.key) stage = '<div class="callout">This is the losing move. The refutation is <span class="mono">' + esc(keyLab) + "</span>.</div>";
+    else stage = '<div class="callout key">' + esc(t.idea) + "</div>";
+    let h = '<div class="card">';
+    h += '<div class="eyebrow">' + sideChip(t.side) + "<span>" + esc(t.opening) + "</span></div>";
+    h += "<h3>" + esc(t.title) + "</h3>";
+    h += stage;
+    h += '<div><div class="sub">Engine swing (White\'s view)</div><div class="evals">';
+    t.evals.forEach((e, i) => {
+      if (i) h += '<span class="arrowsep">→</span>';
+      h += '<span class="ev' + (i === 1 ? " hot" : "") + '"><span class="m">' + esc(e[0]) + '</span><span class="v num">' + fmtEval(e[1]) + "</span></span>";
+    });
+    h += "</div></div>";
+    if (state.ply >= t.key) h += "<p><strong>How to avoid it:</strong> " + esc(t.avoid) + "</p>";
+    h += '<div class="cardbtns"><button type="button" class="btn" data-trapply="' + (t.bad - 1) + '">Before the mistake</button><button type="button" class="btn" data-trapply="' + t.key + '">Show the punishment</button><button type="button" class="btn" data-trapply="' + (mv.length - 1) + '">Final position</button><button type="button" class="btn primary" id="back-tree">Back to the tree</button></div>';
+    h += '<a class="ext" href="' + lichess(mv[state.ply].fen) + '" target="_blank" rel="noopener">Open this position in Lichess ↗</a>';
+    h += "</div>";
+    el.innerHTML = h;
+  }
+
+  /* ---------- Next moves ---------- */
+  function drawNext() {
+    const panel = $("#nextpanel");
+    if (state.mode === "trap") { panel.hidden = true; return; }
+    panel.hidden = false;
+    const n = nodeAtPly();
+    const box = $("#next");
+    if (state.ply !== n.end) {
+      const nx = state.line[state.ply + 1];
+      box.innerHTML = '<div class="empty">You are looking at an earlier move of this line. Step forward with ▶ or pick a move above.' + (nx ? ' Next in this line: <span class="mono">' + esc(plyLabel(state.ply + 1, nx.san, true)) + "</span>" : "") + "</div>";
+      return;
+    }
+    const kids = sortedKids(n);
+    if (!kids.length) {
+      const tw = twins(n).filter((t) => t.kids.length);
+      box.innerHTML = '<div class="empty">End of the mapped line.' + (tw.length ? ' The tree continues from the transposed position: <button type="button" class="linkbtn" data-node="' + tw[0].id + '">' + esc(seqLabel(tw[0].path, 0)) + "</button>" : n.tx ? " " + esc(n.tx) : "") + "</div>";
+      return;
+    }
+    let h = '<table class="next"><thead><tr><th>Move</th><th class="gm">Games</th><th>White / Draw / Black</th><th>Your score</th></tr></thead><tbody>';
+    kids.forEach((k) => {
+      const st = stats(k);
+      const badges = (twins(k).length ? '<span class="badge t">⇄ transposes</span>' : "") + (hasTrapBelow(k) || trapsAt(k).length ? '<span class="badge trap">trap</span>' : "");
+      h += '<tr tabindex="0" data-node="' + k.id + '"><td><div class="mv">' + esc(seqLabel(k.sans, k.start)) + badges + "</div>" + (k.n ? '<div class="nm">' + esc(k.n) + "</div>" : "") + "</td>";
+      h += '<td class="gm num">' + fmtGames(st && st.g) + "</td>";
+      h += '<td class="barc">' + barHtml(st && st.s, false) + "</td>";
+      h += "<td>" + scoreHtml(st && st.s) + "</td></tr>";
+    });
+    h += "</tbody></table>";
+    box.innerHTML = h;
+  }
+
+  /* ---------- Outline ---------- */
+  function drawOutline() {
+    const root = ROOT[state.tree];
+    const selId = state.mode === "tree" ? nodeAtPly().id : null;
+    const rowHtml = (n) => {
+      const st = stats(n);
+      const open = state.open.has(n.id);
+      const has = n.kids.length > 0;
+      let h = '<li role="treeitem"' + (has ? ' aria-expanded="' + open + '"' : "") + '><div class="orow' + (n.id === selId ? " sel" : "") + '">';
+      h += '<button type="button" class="car" data-toggle="' + n.id + '"' + (has ? ' aria-label="' + (open ? "Collapse" : "Expand") + '"' : " disabled") + ">" + (has ? (open ? "▾" : "▸") : "·") + "</button>";
+      h += '<button type="button" class="lab" data-node="' + n.id + '"><span class="mv">' + esc(seqLabel(n.sans, n.start)) + "</span>";
+      const badges = (twins(n).length ? '<span class="badge t">⇄</span>' : "") + (n.trap ? '<span class="badge trap">trap</span>' : "");
+      if (n.n || badges) h += '<span class="nm">' + esc(n.n || "") + badges + "</span>";
+      h += "</button>" + barHtml(st && st.s, true) + '<span class="gm num">' + fmtGames(st && st.g) + "</span></div>";
+      if (has && open) h += '<ul role="group">' + sortedKids(n).map(rowHtml).join("") + "</ul>";
+      return h + "</li>";
+    };
+    $("#outline").innerHTML = "<ul>" + rowHtml(root) + "</ul>";
+    $("#outline-title").textContent = "Full tree · " + TREES[state.tree].first;
+  }
+
+  /* ---------- Traps section ---------- */
+  function trapCard(t) {
+    const mv = lineInfo(t.line.split(" "));
+    const from = Math.max(1, t.bad - 2);
+    const crit = [];
+    for (let i = from; i <= Math.min(t.key, mv.length - 1); i++) {
+      const lab = esc(plyLabel(i, mv[i].san, i === from));
+      crit.push(i === t.bad ? '<span class="bad">' + lab + (t.mark || "?") + "</span>" : i === t.key ? '<span class="key">' + lab + "!</span>" : lab);
+    }
+    return '<div class="panel trapcard"><div class="row">' + sideChip(t.side) + '<span class="swing">' + fmtEval(t.evals[0][1]) + " → " + fmtEval(t.evals[1][1]) + "</span></div>" +
+      "<h4>" + esc(t.title) + '</h4><div class="op">' + esc(t.opening) + '</div><div class="crit">' + crit.join(" ") + "</div><p>" + esc(t.idea) + "</p>" +
+      '<div class="row"><button type="button" class="btn primary" data-trap="' + t.id + '">Play through on the board</button></div></div>';
+  }
+  function drawTraps() {
+    const me = state.persp;
+    const list = TRAPS.filter((t) => state.tf === "all" || t.tree === state.tf);
+    const mine = list.filter((t) => t.side === me);
+    const theirs = list.filter((t) => t.side !== me);
+    const col = me === "w" ? "White" : "Black";
+    $("#col-set").innerHTML = '<span class="side ' + me + '">' + col + "</span> Traps you can set";
+    $("#col-avoid").innerHTML = '<span class="side ' + (me === "w" ? "b" : "w") + '">' + (me === "w" ? "Black" : "White") + "</span> Traps to avoid as " + col;
+    $("#trap-set").innerHTML = mine.map(trapCard).join("") || '<div class="empty">No traps for this filter.</div>';
+    $("#trap-avoid").innerHTML = theirs.map(trapCard).join("") || '<div class="empty">No traps for this filter.</div>';
+    ["all", "english", "french"].forEach((k) => $("#tf-" + k).setAttribute("aria-pressed", String(state.tf === k)));
+  }
+
+  /* ---------- Transpositions section ---------- */
+  function drawTransp() {
+    const groups = Object.values(GROUPS).filter((g) => g.length > 1);
+    groups.sort((a, b) => {
+      const ca = new Set(a.map((x) => x.tree)).size, cb = new Set(b.map((x) => x.tree)).size;
+      return cb - ca || a[0].end - b[0].end;
+    });
+    $("#txgrid").innerHTML = groups.map((g) => {
+      const cross = new Set(g.map((x) => x.tree)).size > 1;
+      const named = g.find((x) => x.n) || g[0];
+      const title = nameOf(named);
+      return '<div class="panel txcard">' + (cross ? '<span class="cross">English ⇄ French cross-over</span>' : "") + "<h4>" + esc(title) + '</h4><div class="tx">' +
+        g.map((x, i) => (i ? '<div class="eq">same position as</div>' : "") + '<button type="button" data-node="' + x.id + '"><span class="via">' + esc(TREES[x.tree].label) + " tree</span>" + esc(seqLabel(x.path, 0)) + "</button>").join("") + "</div></div>";
+    }).join("");
+    const exits = Object.values(NODES).filter((n) => n.tx && !twins(n).length);
+    $("#exits").innerHTML = exits.map((n) => '<li><button type="button" data-node="' + n.id + '">' + esc(seqLabel(n.path, 0)) + "</button><span>" + esc(n.tx) + "</span></li>").join("");
+  }
+
+  /* ---------- Render ---------- */
+  function render() {
+    ["english", "french"].forEach((k) => $("#t-" + k).setAttribute("aria-pressed", String(state.tree === k)));
+    ["w", "b"].forEach((k) => $("#p-" + k).setAttribute("aria-pressed", String(state.persp === k)));
+    drawBoard();
+    drawMoves();
+    drawCard();
+    drawNext();
+    drawOutline();
+    drawTraps();
+  }
+
+  /* ---------- Navigation ---------- */
+  function go(ply) {
+    const last = state.line.length - 1;
+    if (state.mode === "tree" && ply > last) {
+      const k = sortedKids(curNode())[0];
+      if (k) { selectNode(k, k.start + 1); }
+      return;
+    }
+    state.ply = Math.max(0, Math.min(last, ply));
+    state.hover = null;
+    if (state.mode === "tree") openPath(nodeAtPly());
+    render();
+  }
+  $("#nav-first").addEventListener("click", () => go(0));
+  $("#nav-prev").addEventListener("click", () => go(state.ply - 1));
+  $("#nav-next").addEventListener("click", () => go(state.ply + 1));
+  $("#nav-last").addEventListener("click", () => go(state.line.length - 1));
+  $("#nav-flip").addEventListener("click", () => { state.flip = !state.flip; state.flipTouched = true; drawBoard(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.target.closest && e.target.closest("input, textarea, select")) return;
+    if (e.key === "ArrowLeft") { e.preventDefault(); go(state.ply - 1); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); go(state.ply + 1); }
+    else if (e.key === "Home") { e.preventDefault(); go(0); }
+    else if (e.key === "End") { e.preventDefault(); go(state.line.length - 1); }
+    else if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches("tr[data-node]")) { e.preventDefault(); selectNode(NODES[e.target.dataset.node]); }
+  });
+
+  document.querySelectorAll("[data-tree]").forEach((b) => b.addEventListener("click", () => setTree(b.dataset.tree)));
+  document.querySelectorAll("[data-persp]").forEach((b) => b.addEventListener("click", () => {
+    state.persp = b.dataset.persp;
+    store.set("e6tree.persp", state.persp);
+    if (!state.flipTouched) state.flip = state.persp === "b";
+    render();
+  }));
+  document.querySelectorAll("[data-tf]").forEach((b) => b.addEventListener("click", () => { state.tf = b.dataset.tf; drawTraps(); }));
+  $("#ol-open").addEventListener("click", () => { Object.values(NODES).forEach((n) => { if (n.tree === state.tree) state.open.add(n.id); }); drawOutline(); });
+  $("#ol-close").addEventListener("click", () => { state.open = new Set(); openPath(state.mode === "tree" ? nodeAtPly() : ROOT[state.tree]); drawOutline(); });
+
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-node],[data-trap],[data-toggle],[data-ply],[data-trapply],#back-tree");
+    if (!t) return;
+    if (t.id === "back-tree") {
+      const tr = TRAP[state.trapId];
+      const anchor = Object.values(NODES).find((n) => n.trap === tr.id);
+      return selectNode(anchor || ROOT[state.tree]);
+    }
+    if (t.dataset.toggle) {
+      const id = t.dataset.toggle;
+      state.open.has(id) ? state.open.delete(id) : state.open.add(id);
+      return drawOutline();
+    }
+    if (t.dataset.ply != null) return go(+t.dataset.ply);
+    if (t.dataset.trapply != null) { state.ply = +t.dataset.trapply; return render(); }
+    if (t.dataset.trap) return openTrap(TRAP[t.dataset.trap]);
+    if (t.dataset.node) {
+      const n = NODES[t.dataset.node];
+      selectNode(n);
+      if (t.closest("#txgrid, #exits, .tx")) $("#boardbox").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
+    }
+  });
+  const nextBox = $("#next");
+  nextBox.addEventListener("mouseover", (e) => {
+    const tr = e.target.closest("tr[data-node]");
+    if (!tr) return;
+    const k = NODES[tr.dataset.node];
+    const m = moveSquares(state.line[state.ply].fen, k.sans[0]);
+    if (m && (!state.hover || state.hover.from !== m.from || state.hover.to !== m.to)) { state.hover = m; drawArrows(); }
+  });
+  nextBox.addEventListener("mouseleave", () => { if (state.hover) { state.hover = null; drawArrows(); } });
+  nextBox.addEventListener("focusin", (e) => {
+    const tr = e.target.closest("tr[data-node]");
+    if (!tr) return;
+    state.hover = moveSquares(state.line[state.ply].fen, NODES[tr.dataset.node].sans[0]);
+    drawArrows();
+  });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawArrows);
+  new MutationObserver(drawArrows).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  /* ---------- Start ---------- */
+  drawTransp();
+  const r = ROOT[state.tree];
+  state.open = new Set([r.id]);
+  selectNode(r);
+})();
+</script>
+
+</body>
+</html>
